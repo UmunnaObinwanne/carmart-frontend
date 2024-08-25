@@ -12,6 +12,7 @@ const formatTime = (date) => {
 };
 
 const CarCard = ({ car }) => {
+  console.log(car)
   const timePosted = formatTime(car.createdAt);
 
   // Format the price with Pound sign and thousand separator
