@@ -5,6 +5,7 @@ import typography from '@tailwindcss/typography';
 
 /** @type {import('tailwindcss').Config} */
 export default withMT({
+  darkMode: 'class',  // Enable dark mode via a class
   content: [
     "./index.html",
     "./src/**/*.{html,js,jsx,ts,tsx}",
@@ -37,7 +38,7 @@ export default withMT({
       },
       transitionTimingFunction: {
         'ease-in-out': 'ease-in-out',
-    },
+      },
     },
   },
   plugins: [
