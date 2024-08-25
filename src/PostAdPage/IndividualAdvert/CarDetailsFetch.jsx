@@ -20,6 +20,7 @@ import SellerProfile from "../../UserProfile/SellerProfile";
 import CarInformation from "./CarInfoTab/CarInformation";
 import CarInteriorCard from "./CarInfoTab/CarInteriorCard";
 import EnvironmentalFeatures from "./CarInfoTab/EnvironmentalFeatures";
+import AdvertDescription from "./AdvertDescription";
 
 function CarDetailsFetch() {
   const location = useLocation();
@@ -181,7 +182,7 @@ function CarDetailsFetch() {
                   </span>
                 </div>
 
-                <p className="mb-4 text-gray-700">{advert.description}</p>
+                <AdvertDescription description={advert.description} />
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div className="flex items-center text-gray-800">
