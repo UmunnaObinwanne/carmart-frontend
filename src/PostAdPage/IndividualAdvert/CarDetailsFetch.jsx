@@ -62,7 +62,7 @@ function CarDetailsFetch() {
 
         // Fetch seller information based on postedBy ID from advert
         const sellerResponse = await axios.get(
-          `http://localhost:5000/profile/${advertResponse.data.postedBy._id}`
+          `${apiUrl}/profile/${advertResponse.data.postedBy._id}`
         );
         setSeller(sellerResponse.data);
         setPhoneNumber(sellerResponse.data.phoneNumber);
@@ -93,7 +93,7 @@ function CarDetailsFetch() {
 
   const handleBidSubmit = async () => {
     try {
-      await axios.post(`http://localhost:5000/bids`, {
+      await axios.post(`${apiUrl}/bids`, {
         advertId,
         amount: bidAmount,
       });
@@ -107,7 +107,7 @@ function CarDetailsFetch() {
   const handleSendMessage = async () => {
     try {
       const response = await axios.post(
-        `http://localhost:5000/user/send-message`,
+        `${apiUrl}/user/send-message`,
         {
           recipientId: advert.postedBy._id,
           content: message,

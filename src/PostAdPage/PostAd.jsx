@@ -58,6 +58,8 @@ const PostAd = () => {
   const [fuelTypes, setFuelTypes] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
+  const apiUrl = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     const fetchOptions = async () => {
       try {
@@ -70,13 +72,13 @@ const PostAd = () => {
           categoryOptions,
           modelOptions,
         ] = await Promise.all([
-          axios.get("http://localhost:5000/transmission-options"),
-          axios.get("http://localhost:5000/drive-options"),
-          axios.get("http://localhost:5000/feature-options"),
-          axios.get("http://localhost:5000/transaction-options"),
-          axios.get("http://localhost:5000/fuel-type"),
-          axios.get("http://localhost:5000/categories"),
-          axios.get("http://localhost:5000/models"),
+          axios.get(`${apiUrl}/transmission-options`),
+          axios.get(`${apiUrl}/drive-options`),
+          axios.get(`${apiUrl}/feature-options`),
+          axios.get(`${apiUrl}/transaction-options`),
+          axios.get(`${apiUrl}/fuel-type`),
+          axios.get(`${apiUrl}/categories`),
+          axios.get(`${apiUrl}/models`),
         ]);
 
         setTransmissions(transmissionOptions.data);
@@ -179,7 +181,7 @@ const PostAd = () => {
 
     try {
       const imageUploadResponse = await axios.post(
-        "http://localhost:5000/image/upload-image",
+        `${apiUrl}/image/upload-image`,
         imageFormData,
         {
           headers: {
@@ -201,7 +203,7 @@ const PostAd = () => {
     console.log("Ad data to be posted:", adData);
 
     try {
-      const response = await fetch("http://localhost:5000/create-advert", {
+      const response = await fetch(`${apiUrl}/create-advert`, {
         credentials: "include",
         method: "POST",
         headers: {

@@ -45,7 +45,7 @@ function ChatDetails() {
 
     try {
       const response = await axios.post(
-        `http://localhost:5000/user/messages/${chatId}/reply`,
+        `${apiUrl}/user/messages/${chatId}/reply`,
         { content: newMessage },
         {
           withCredentials: true,

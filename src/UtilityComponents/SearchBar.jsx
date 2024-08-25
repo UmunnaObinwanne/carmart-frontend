@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { FaSearch } from "react-icons/fa"; // Import search icon
 
@@ -9,10 +9,12 @@ const SearchBar = ({ onSearch }) => {
   const [maxPrice, setMaxPrice] = useState("");
   const [city, setCity] = useState("");
 
+  const apiUrl = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     // Fetch models when component mounts
     axios
-      .get("http://localhost:5000/models")
+      .get(`${apiUrl}/models`)
       .then((response) => setModels(response.data))
       .catch((error) => console.error("Error fetching models:", error));
   }, []);

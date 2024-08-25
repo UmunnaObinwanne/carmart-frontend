@@ -5,6 +5,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const UserProfile = () => {
+  const apiUrl = import.meta.env.VITE_API_URL;
+
   const [profile, setProfile] = useState({
     username: "",
     email: "",
@@ -23,7 +25,7 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/profile", {
+        const response = await axios.get(`${apiUrl}/profile`, {
           withCredentials: true,
         });
         const userData = response.data.user || {};
@@ -58,13 +60,9 @@ const UserProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.put(
-        "http://localhost:5000/profile",
-        profile,
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await axios.put(`${apiUrl}/profile`, profile, {
+        withCredentials: true,
+      });
 
       setProfile(response.data);
       toast.success("Profile Updated");
