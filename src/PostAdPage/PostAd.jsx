@@ -191,7 +191,7 @@ const PostAd = () => {
 
     try {
       const imageUploadResponse = await axios.post(
-        `${apiUrl}/image/upload-image`,
+        `${apiUrl}/upload-image`,
         imageFormData,
         {
           headers: {
