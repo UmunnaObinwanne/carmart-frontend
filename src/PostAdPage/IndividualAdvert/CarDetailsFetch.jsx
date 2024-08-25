@@ -54,7 +54,7 @@ function CarDetailsFetch() {
         setMainImage(advertResponse.data.imageUrls[0]);
 
         // Fetch current user's profile
-        const userResponse = await axios.get("http://localhost:5000/profile", {
+        const userResponse = await axios.get(`${apiUrl}/profile`, {
           withCredentials: true,
         });
 
