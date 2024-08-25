@@ -340,7 +340,7 @@ const PostAd = () => {
               </label>
               <Description
                 content={formData.description}
-                setContent={(content) => handleChange(content)}
+                setContent={handleChange}
               />
             </div>
 
