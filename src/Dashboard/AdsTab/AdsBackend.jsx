@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
 import Ads from "../../assets/car.svg";
+import DOMPurify from "dompurify"; // Import DOMPurify
 
 function AdsBackend() {
   const userId = useSelector((state) => state.user.userId);
@@ -44,6 +45,11 @@ function AdsBackend() {
   if (loading) {
     return <div>Loading...</div>;
   }
+
+  // Sanitize HTML function
+  const sanitizeHTML = (html) => {
+    return DOMPurify.sanitize(html);
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
@@ -86,29 +92,39 @@ function AdsBackend() {
                 {userAds.map((ad) => (
                   <tr key={ad._id} className="border-b">
                     <td className="p-4">{ad.title}</td>
-                    <td className="p-4">{ad.description}</td>
+                    <td className="p-4">
+                      {/* Sanitize and render the description */}
+                      <div
+                        className="text-gray-700"
+                        dangerouslySetInnerHTML={{
+                          __html: sanitizeHTML(ad.description),
+                        }}
+                      />
+                    </td>
                     <td className="p-4 text-green-600 font-semibold">
                       ${ad.price}
                     </td>
-                    <td className="p-4 text-center">
-                      <Link
-                        to={`/edit-ad/${ad._id}`}
-                        className="text-blue-500 mx-2"
-                      >
-                        <FaEdit />
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(ad._id)}
-                        className="text-red-500 mx-2"
-                      >
-                        <FaTrash />
-                      </button>
-                      <Link
-                        to={`/view-ad/${ad._id}`}
-                        className="text-gray-600 mx-2"
-                      >
-                        <FaEye />
-                      </Link>
+                    <td className="p-4">
+                      <div className="flex justify-center space-x-4">
+                        <Link
+                          to={`/edit-ad/${ad._id}`}
+                          className="text-blue-500"
+                        >
+                          <FaEdit />
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(ad._id)}
+                          className="text-red-500"
+                        >
+                          <FaTrash />
+                        </button>
+                        <Link
+                          to={`/view-ad/${ad._id}`}
+                          className="text-gray-600"
+                        >
+                          <FaEye />
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}
