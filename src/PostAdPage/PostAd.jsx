@@ -96,13 +96,23 @@ const PostAd = () => {
     fetchOptions();
   }, []);
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
+ const handleChange = (e) => {
+   if (e && e.target) {
+     const { name, value, type, checked } = e.target;
+     setFormData((prev) => ({
+       ...prev,
+       [name]: type === "checkbox" ? checked : value,
+     }));
+   }
+ };
+
+ const handleDescriptionChange = (content) => {
+   setFormData((prev) => ({
+     ...prev,
+     description: content,
+   }));
+ };
+
 
   const handlePriceChange = (value) => {
     setFormData((prevData) => ({
@@ -340,7 +350,7 @@ const PostAd = () => {
               </label>
               <Description
                 content={formData.description}
-                setContent={handleChange}
+                setContent={handleDescriptionChange} // Use the new handler for Quill
               />
             </div>
 
