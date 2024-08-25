@@ -5,7 +5,7 @@ import typography from '@tailwindcss/typography';
 
 /** @type {import('tailwindcss').Config} */
 export default withMT({
-  darkMode: 'class',  // Enable dark mode via a class
+  darkMode: 'class', // or 'media' for automatic dark mode based on system preferences
   content: [
     "./index.html",
     "./src/**/*.{html,js,jsx,ts,tsx}",

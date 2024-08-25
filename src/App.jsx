@@ -19,7 +19,7 @@ import HomepageContainer from "./Homepage-Components/HomepageContainer";
 
 function App() {
   return (
-    <>
+    <div className="bg-white min-h-screen dark:bg-white">
       <Routes>
         <Route path="/" element={<NavigationBar />}>
           <Route index element={<HomepageContainer />} />
@@ -46,7 +46,7 @@ function App() {
           </Route>
         </Route>
       </Routes>
-    </>
+    </div>
   );
 }
 
