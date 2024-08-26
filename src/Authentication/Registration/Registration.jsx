@@ -11,7 +11,7 @@ const RegistrationForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, loggingIn, loginError } = useSelector(
-    (state) => state.user
+    (state) => state.auth
   );
 
   const [formData, setFormData] = useState({
