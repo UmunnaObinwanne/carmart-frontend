@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { logout } from "../Slices/userSlice"; // Update import if necessary
+import { logoutUser } from "../Slices/AuthSlice"; // Make sure to use the correct import
 import { FaSignInAlt, FaUserPlus, FaEnvelope } from "react-icons/fa";
 import Footer from "../UtilityComponents/Footer";
 import { Sidebar } from "flowbite-react";
@@ -16,13 +16,13 @@ import {
 
 export default function NavigationBar() {
   const dispatch = useDispatch();
-  const { isAuthenticated } = useSelector((state) => state.user);
-
+  const navigate = useNavigate();
+  const { isAuthenticated } = useSelector((state) => state.auth);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const handleLogout = () => {
-    dispatch(logout());
-    window.location.href = "/login";
+  const handleLogout = async () => {
+    await dispatch(logoutUser());
+    navigate("/login"); // Redirect after successful logout
   };
 
   return (
@@ -165,7 +165,9 @@ export default function NavigationBar() {
                       <Link to="/settings">Settings</Link>
                     </li>
                     <li>
-                      <a onClick={handleLogout}>Logout</a>
+                      <a onClick={handleLogout} role="button">
+                        Logout
+                      </a>
                     </li>
                   </ul>
                 </div>

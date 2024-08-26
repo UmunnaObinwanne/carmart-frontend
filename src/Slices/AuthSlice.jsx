@@ -8,18 +8,16 @@ export const checkAuthStatus = createAsyncThunk(
   "auth/checkStatus",
   async (_, { getState, rejectWithValue }) => {
     try {
-      // Send request to auth-check endpoint
       const response = await axios.get(`${apiUrl}/auth-check`, {
         withCredentials: true,
       });
 
-      const { authenticated } = response.data; // Only authenticated is returned
+      const { authenticated } = response.data;
       const state = getState();
       const currentUserId = state.auth.userId;
 
-      // Here, we don't need to compare userId if the API doesn't provide it
       if (authenticated) {
-        return { authenticated, userId: currentUserId }; // Return the current userId from state
+        return { authenticated, userId: currentUserId };
       } else {
         throw new Error("User is not authenticated");
       }
@@ -31,17 +29,17 @@ export const checkAuthStatus = createAsyncThunk(
 
 // Handle Logout
 export const logoutUser = createAsyncThunk(
-  "user/logout",
+  "auth/logout",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.post(
+      await axios.post(
         `${apiUrl}/logout`,
         {},
         {
           withCredentials: true,
         }
       );
-      return response;
+      return {}; // No need to return anything specific
     } catch (error) {
       return rejectWithValue(error.response?.data?.error || "Logout failed");
     }
@@ -70,7 +68,7 @@ const authSlice = createSlice({
       .addCase(checkAuthStatus.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.isAuthenticated = action.payload.authenticated;
-        state.userId = action.payload.userId; // Update userId from the state
+        state.userId = action.payload.userId;
       })
       .addCase(checkAuthStatus.rejected, (state, action) => {
         state.status = "failed";
