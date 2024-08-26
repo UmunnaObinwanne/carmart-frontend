@@ -22,7 +22,7 @@ const LoginForm = () => {
     loggingIn: state.user.loggingIn,
   }));
 
-  console.log('auth', isAuthenticated)
+  console.log()
   const [formData, setFormData] = useState({
     email: "",
     password: "",
