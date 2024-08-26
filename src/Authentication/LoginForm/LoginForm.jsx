@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { loginUser } from "../../Slices/UserSlice";
-import { checkAuthStatus } from "../../Slices/AuthSlice";
 import GoogleIcon from "../../../src/assets/google.svg";
 import LoginImage from "../../assets/ecommercelede.png";
 import { ToastContainer, toast } from "react-toastify";
@@ -14,12 +13,12 @@ const LoginForm = () => {
   const redirectTo = location.state?.from || "/used-cars"; // Default redirect if state is null
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isAuthenticated, loginError, userId } = useSelector(
+  const { isAuthenticated, loginError, loggingIn, user } = useSelector(
     (state) => state.user
   );
 
   const [formData, setFormData] = useState({
-    username: "",
+    email: "",
     password: "",
   });
 
@@ -27,32 +26,44 @@ const LoginForm = () => {
 
   useEffect(() => {
     if (loginError) {
-      toast.error("Login failed. Please try again.");
+      toast.error(loginError);
     }
   }, [loginError]);
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      toast.success("Login successful!");
+      navigate(redirectTo);
+    }
+  }, [isAuthenticated, navigate, redirectTo]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prevData) => ({
+      ...prevData,
       [name]: value,
-    });
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!formData.email || !formData.password) {
+      setPasswordError("Email and Password are required.");
+      return;
+    }
+
+    setPasswordError("");
+
     try {
       const resultAction = await dispatch(loginUser(formData)).unwrap();
       if (resultAction.userId) {
-        await dispatch(checkAuthStatus());
-        toast.success("Login successful!");
-        navigate(redirectTo);
+        await dispatch(checkAuthStatus()); // Assuming checkAuthStatus updates the user session
       } else {
         throw new Error("User ID is missing in response");
       }
     } catch (error) {
-      toast.error("Login failed. Please try again.");
+      toast.error(error.message || "Login failed. Please try again.");
       console.error("Login Submission Error:", error.message);
     }
   };
@@ -64,7 +75,7 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900 flex justify-center">
+    <div className="min-h-screen bg-gray-100 text-gray-900 flex justify-center items-center">
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -97,18 +108,19 @@ const LoginForm = () => {
 
               <div className="my-12 border-b text-center">
                 <div className="leading-none px-2 inline-block text-sm text-gray-600 tracking-wide font-medium bg-white transform translate-y-1/2">
-                  Or sign in with your Username and Password
+                  Or sign in with your Email and Password
                 </div>
               </div>
 
               <form onSubmit={handleSubmit} className="mx-auto max-w-xs">
                 <input
                   className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                  type="text"
-                  name="username"
-                  placeholder="Username"
-                  value={formData.username}
+                  type="email"
+                  name="email"
+                  placeholder="Email"
+                  value={formData.email}
                   onChange={handleChange}
+                  required
                 />
                 <input
                   className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white mt-5"
@@ -117,25 +129,29 @@ const LoginForm = () => {
                   placeholder="Password"
                   value={formData.password}
                   onChange={handleChange}
+                  required
                 />
                 {passwordError && (
-                  <p className="text-red-500">{passwordError}</p>
+                  <p className="text-red-500 mt-2">{passwordError}</p>
                 )}
                 <button
                   type="submit"
                   className="mt-5 tracking-wide font-semibold bg-green-400 text-white w-full py-4 rounded-lg hover:bg-green-700 transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none"
+                  disabled={loggingIn}
                 >
-                  <span className="ml-1">Sign In</span>
+                  <span className="ml-1">
+                    {loggingIn ? "Signing In..." : "Sign In"}
+                  </span>
                 </button>
                 <p className="mt-6 text-xs text-gray-600 text-center">
-                  I agree to abide by ShowMart's
+                  I agree to abide by ShopMart's{" "}
                   <a
                     href="#"
                     className="border-b border-gray-500 border-dotted"
                   >
                     Terms of Service
-                  </a>
-                  and its
+                  </a>{" "}
+                  and its{" "}
                   <a
                     href="#"
                     className="border-b border-gray-500 border-dotted"

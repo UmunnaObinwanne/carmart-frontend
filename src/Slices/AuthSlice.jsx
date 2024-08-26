@@ -4,23 +4,24 @@ import axios from "axios";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 // Thunk to check authentication status
-
 export const checkAuthStatus = createAsyncThunk(
   "auth/checkStatus",
   async (_, { getState, rejectWithValue }) => {
-    const { userId } = getState().user;
-
     try {
+      // Send request to auth-check endpoint
       const response = await axios.get(`${apiUrl}/auth-check`, {
         withCredentials: true,
       });
 
-      const { authenticated } = response.data; // Response only has 'authenticated'
-      if (authenticated && userId) {
-        // Check if userId exists
-        return { authenticated, userId }; // Return the necessary fields
+      const { authenticated } = response.data; // Only authenticated is returned
+      const state = getState();
+      const currentUserId = state.auth.userId;
+
+      // Here, we don't need to compare userId if the API doesn't provide it
+      if (authenticated) {
+        return { authenticated, userId: currentUserId }; // Return the current userId from state
       } else {
-        throw new Error("User ID does not match or user is not authenticated");
+        throw new Error("User is not authenticated");
       }
     } catch (error) {
       return rejectWithValue(error.message || "Auth check failed");
@@ -53,7 +54,7 @@ const authSlice = createSlice({
     isAuthenticated: false,
     status: "idle",
     error: null,
-    userId: null, // Store userId
+    userId: null,
   },
   reducers: {
     logout(state) {
@@ -69,7 +70,7 @@ const authSlice = createSlice({
       .addCase(checkAuthStatus.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.isAuthenticated = action.payload.authenticated;
-        state.userId = action.payload.userId; // Update userId
+        state.userId = action.payload.userId; // Update userId from the state
       })
       .addCase(checkAuthStatus.rejected, (state, action) => {
         state.status = "failed";

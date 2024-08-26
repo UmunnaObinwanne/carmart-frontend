@@ -1,4 +1,3 @@
-// src/components/Profile.jsx
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
@@ -26,7 +25,7 @@ const UserProfile = () => {
     const fetchProfile = async () => {
       try {
         const response = await axios.get(`${apiUrl}/profile`, {
-          withCredentials: true,
+          withCredentials: true, // Include cookies in the request
         });
         const userData = response.data.user || {};
         setProfile({
@@ -42,12 +41,12 @@ const UserProfile = () => {
         });
         setLoading(false);
       } catch (err) {
-        setError(err.response ? err.response.data.error : err.message);
+        setError(err.response ? err.response.data.message : err.message);
         setLoading(false);
       }
     };
     fetchProfile();
-  }, []);
+  }, [apiUrl]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -61,7 +60,7 @@ const UserProfile = () => {
     e.preventDefault();
     try {
       const response = await axios.put(`${apiUrl}/profile`, profile, {
-        withCredentials: true,
+        withCredentials: true, // Include cookies in the request
       });
 
       setProfile(response.data);
@@ -177,16 +176,6 @@ const UserProfile = () => {
             type="text"
             name="phone"
             value={profile.phone}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border rounded-lg"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">About</label>
-          <input
-            type="textArea"
-            name="phone"
-            value={profile.about}
             onChange={handleChange}
             className="w-full px-3 py-2 border rounded-lg"
           />

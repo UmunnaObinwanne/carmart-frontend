@@ -13,8 +13,11 @@ const AuthChecker = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const action = await dispatch(checkAuthStatus());
-      if (checkAuthStatus.rejected.match(action)) {
+      try {
+        // Await the dispatch and unwrap the result
+        await dispatch(checkAuthStatus()).unwrap();
+      } catch (error) {
+        // Handle authentication failure
         dispatch(logout());
         setShowModal(true); // Show modal if auth check failed
       }
@@ -35,7 +38,7 @@ const AuthChecker = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (!userId) {
+    if (!isAuthenticated || !userId) {
       dispatch(logout());
       setShowModal(true); // Show modal if user is not authenticated or userId is missing
       navigate("/login");
@@ -44,7 +47,7 @@ const AuthChecker = () => {
 
   const handleCloseModal = () => {
     setShowModal(false);
-    dispatch(logout());
+    navigate("/login"); // Redirect to login when the modal is closed
   };
 
   return (
@@ -53,6 +56,7 @@ const AuthChecker = () => {
         isOpen={showModal}
         onRequestClose={handleCloseModal}
         contentLabel="Authentication Required"
+        ariaHideApp={false} // Optional: If you want to hide the app content behind the modal
       >
         <h2>Session Expired</h2>
         <p>Your session has expired. Please log in again.</p>
