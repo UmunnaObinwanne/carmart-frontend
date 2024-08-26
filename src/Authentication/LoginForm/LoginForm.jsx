@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { loginUser } from "../../Slices/UserSlice";
+import { checkAuthStatus } from "../../Slices/AuthSlice"; // Assumes this handles session checks
 import GoogleIcon from "../../../src/assets/google.svg";
 import LoginImage from "../../assets/ecommercelede.png";
 import { ToastContainer, toast } from "react-toastify";
@@ -13,15 +14,19 @@ const LoginForm = () => {
   const redirectTo = location.state?.from || "/used-cars"; // Default redirect if state is null
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isAuthenticated, loginError, loggingIn, user } = useSelector(
-    (state) => state.user
-  );
 
+  // Select authentication state from AuthSlice
+  const { isAuthenticated, loginError, loggingIn } = useSelector((state) => ({
+    isAuthenticated: state.auth.isAuthenticated,
+    loginError: state.user.loginError,
+    loggingIn: state.user.loggingIn,
+  }));
+
+  console.log('auth', isAuthenticated)
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-
   const [passwordError, setPasswordError] = useState("");
 
   useEffect(() => {
@@ -31,11 +36,12 @@ const LoginForm = () => {
   }, [loginError]);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && location.pathname === "/login") {
+      // Redirect only after login
       toast.success("Login successful!");
       navigate(redirectTo);
     }
-  }, [isAuthenticated, navigate, redirectTo]);
+  }, [isAuthenticated, navigate, redirectTo, location.pathname]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,19 +62,15 @@ const LoginForm = () => {
     setPasswordError("");
 
     try {
-      const resultAction = await dispatch(loginUser(formData)).unwrap();
-      if (resultAction.userId) {
-        await dispatch(checkAuthStatus()); // Assuming checkAuthStatus updates the user session
-      } else {
-        throw new Error("User ID is missing in response");
-      }
+      await dispatch(loginUser(formData)).unwrap();
+      // Check auth status after login
+      await dispatch(checkAuthStatus()).unwrap();
     } catch (error) {
       toast.error(error.message || "Login failed. Please try again.");
       console.error("Login Submission Error:", error.message);
     }
   };
 
-  // Redirect to Google OAuth
   const handleGoogleSignIn = () => {
     const apiUrl = import.meta.env.VITE_API_URL;
     window.location.href = `${apiUrl}/auth/google`; // Your backend Google OAuth route
