@@ -12,7 +12,6 @@ const formatTime = (date) => {
 };
 
 const CarCard = ({ car }) => {
-  console.log(car)
   const timePosted = formatTime(car.createdAt);
 
   // Format the price with Pound sign and thousand separator
@@ -29,23 +28,23 @@ const CarCard = ({ car }) => {
   }).format(car.mileage);
 
   return (
-    <div className="w-full flex items-center justify-center p-2 m-0 transition-transform transform hover:scale-105 rounded-md">
+    <div className="w-full flex items-center justify-center p-2">
       {/* <!-- product card --> */}
-      <article className="max-w-xs w-full bg-white rounded-xl shadow-lg overflow-hidden dark:bg-gray-800">
+      <article className="w-full max-w-[90vw] sm:max-w-[80vw] md:max-w-[70vw] lg:max-w-[60vw] bg-white rounded-xl shadow-lg overflow-hidden dark:bg-gray-800">
         <div className="relative">
           <img
-            className="object-cover h-48 w-full rounded-t-xl"
+            className="object-cover h-64 w-full rounded-t-xl"
             src={car.imageUrls[0]}
             alt="Car image"
           />
         </div>
         <div className="border-t border-gray-200 dark:border-gray-500"></div>
 
-        <div className="flex flex-col gap-1 mt-1 px-4 py-2">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-50 truncate">
+        <div className="flex flex-col gap-2 mt-1 px-4 py-2">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-50 truncate">
             {car.title}
           </h2>
-          <div className="text-xs text-gray-600 dark:text-gray-300 flex items-center gap-1">
+          <div className="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-1">
             <span>{car.carName}</span> - <span>{car.year}</span>
           </div>
           <div className="flex justify-between items-center gap-2">
@@ -58,7 +57,7 @@ const CarCard = ({ car }) => {
             </div>
           </div>
         </div>
-        <div className="flex flex-wrap justify-between gap-2 mt-1 px-3 pb-2 text-xs text-gray-600 dark:text-gray-300 divide-x-*">
+        <div className="flex flex-wrap justify-between gap-2 mt-1 px-3 pb-2 text-sm text-gray-600 dark:text-gray-300">
           <div className="flex-1 min-w-[calc(50%-0.5rem)]">
             <span className="block">Top Speed</span>
             <span className="block font-semibold">{car.topSpeed} km/h</span>

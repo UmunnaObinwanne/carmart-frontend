@@ -1,8 +1,6 @@
-// LoginForm.jsx
-
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { loginUser } from "../../Slices/UserSlice";
 import { checkAuthStatus } from "../../Slices/AuthSlice";
 import GoogleIcon from "../../../src/assets/google.svg";
@@ -10,20 +8,15 @@ import LoginImage from "../../assets/ecommercelede.png";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Logo from "../../assets/shopmart logo.jpg";
-import { useLocation } from "react-router-dom";
-//import queryString from "query-string";
 
 const LoginForm = () => {
   const location = useLocation();
-  console.log(location);
   const redirectTo = location.state?.from || "/used-cars"; // Default redirect if state is null
-  console.log(redirectTo);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, loginError, userId } = useSelector(
     (state) => state.user
   );
-  //const authStatus = useSelector((state) => state.auth.authStatus); // Make sure this is correctly selected
 
   const [formData, setFormData] = useState({
     username: "",
@@ -52,12 +45,9 @@ const LoginForm = () => {
     try {
       const resultAction = await dispatch(loginUser(formData)).unwrap();
       if (resultAction.userId) {
-        // Update the state or local storage with the userId if necessary
-        await dispatch(checkAuthStatus()); // Check authentication status after login
-        // Show success toast with a timer
+        await dispatch(checkAuthStatus());
         toast.success("Login successful!");
-        console.log("Redirecting to:", redirectTo);
-        navigate(`/used-cars`, { state: { from: location.pathname } });
+        navigate(redirectTo);
       } else {
         throw new Error("User ID is missing in response");
       }
@@ -65,6 +55,12 @@ const LoginForm = () => {
       toast.error("Login failed. Please try again.");
       console.error("Login Submission Error:", error.message);
     }
+  };
+
+  // Redirect to Google OAuth
+  const handleGoogleSignIn = () => {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    window.location.href = `${apiUrl}/auth/google`; // Your backend Google OAuth route
   };
 
   return (
@@ -88,7 +84,10 @@ const LoginForm = () => {
           <div className="mt-12 flex flex-col items-center">
             <div className="w-full flex-1 mt-8">
               <div className="flex flex-col items-center">
-                <button className="w-full max-w-xs font-bold shadow-sm rounded-lg py-3 bg-green-100 text-gray-800 flex items-center justify-center transition-all duration-300 ease-in-out focus:outline-none hover:shadow focus:shadow-sm focus:shadow-outline">
+                <button
+                  onClick={handleGoogleSignIn}
+                  className="w-full max-w-xs font-bold shadow-sm rounded-lg py-3 bg-green-100 text-gray-800 flex items-center justify-center transition-all duration-300 ease-in-out focus:outline-none hover:shadow focus:shadow-sm focus:shadow-outline"
+                >
                   <div className="bg-white p-2 rounded-full">
                     <img src={GoogleIcon} alt="Google Icon" className="w-4" />
                   </div>

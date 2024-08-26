@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Outlet, Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { logout } from "../Slices/AuthSlice";
+import { logout } from "../Slices/userSlice"; // Update import if necessary
 import { FaSignInAlt, FaUserPlus, FaEnvelope } from "react-icons/fa";
 import Footer from "../UtilityComponents/Footer";
 import { Sidebar } from "flowbite-react";
@@ -16,7 +16,7 @@ import {
 
 export default function NavigationBar() {
   const dispatch = useDispatch();
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated } = useSelector((state) => state.user);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -35,8 +35,6 @@ export default function NavigationBar() {
           } lg:hidden`}
         >
           <div className="w-64 h-full bg-gray-800 text-white p-4">
-            {" "}
-            {/* Dark mode background */}
             <button
               className="text-white hover:text-gray-400 mb-4"
               onClick={() => setSidebarOpen(false)}
@@ -90,8 +88,6 @@ export default function NavigationBar() {
         </div>
 
         <div className="navbar bg-gray-800 text-white">
-          {" "}
-          {/* Dark mode background */}
           <div className="flex-1">
             <Link to="/" className="btn btn-ghost text-xl text-white">
               Carmart Uk

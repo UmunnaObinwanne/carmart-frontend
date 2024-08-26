@@ -40,17 +40,21 @@ const CarGrid = () => {
   };
 
   if (loading) return <Loader />;
-  if (error) return <div>Error: {error}</div>;
+  if (error) return <div className="p-4 text-red-500">Error: {error}</div>;
 
   return (
-    <>
+    <div className="min-h-screen p-4">
       <SearchBar onSearch={handleSearch} />
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 p-1 sm:p-3 md:p-4">
-        {cars.map((car) => (
-          <CarCard key={car._id} car={car} />
-        ))}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-4">
+        {cars.length > 0 ? (
+          cars.map((car) => <CarCard key={car._id} car={car} />)
+        ) : (
+          <div className="col-span-full text-center text-gray-500">
+            No cars found.
+          </div>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 
