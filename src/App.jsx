@@ -16,6 +16,7 @@ import ChatDetails from "./Dashboard/Messages/ChatDetails";
 import SellerProfile from "./UserProfile/SellerProfile";
 import PageDetails from "./ContentManagement/PageDetails";
 import HomepageContainer from "./Homepage-Components/HomepageContainer";
+import LoginRedirect from "./UtilityComponents/LoginRedirect";
 
 function App() {
   return (
@@ -23,24 +24,22 @@ function App() {
       <Routes>
         <Route path="/" element={<NavigationBar />}>
           <Route index element={<HomepageContainer />} />
-          <Route path="/test" element={<Test />} />
           <Route path="/login" element={<LoginForm />} />
+          <Route path="/login-redirect" element={<LoginRedirect />} />
           <Route path="/register" element={<Registration />} />
           <Route path="/used" element={<Location />} />
           <Route path="/used-cars" element={<CarGrid />} />
           <Route path="/:slug" element={<PageDetails />} />
-
           <Route path="/sell" element={<SellerProfile />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/used-cars/:id" element={<CarDetailsFetch />} />
             <Route path="/post-ad" element={<PostAd />} />
 
-            <Route path="/messages/:chatId" element={<ChatDetails />} />
+            <Route path="/chats/:chatId" element={<ChatDetails />} />
             <Route path="/dashboard" element={<Dashboard />}>
               <Route path="/dashboard/my-ads" element={<AdsBackend />} />
               <Route path="/dashboard/messages" element={<MessagesList />} />
-
               <Route path="/dashboard/profile" element={<UserProfile />} />
             </Route>
           </Route>

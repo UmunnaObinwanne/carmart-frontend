@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { logoutUser } from "../Slices/AuthSlice"; // Make sure to use the correct import
+import { logoutUser } from "../Slices/AuthSlice";
 import { FaSignInAlt, FaUserPlus, FaEnvelope } from "react-icons/fa";
 import Footer from "../UtilityComponents/Footer";
 import { Sidebar } from "flowbite-react";
@@ -18,6 +18,7 @@ export default function NavigationBar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isAuthenticated } = useSelector((state) => state.auth);
+  console.log("from Nav", isAuthenticated);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -159,15 +160,22 @@ export default function NavigationBar() {
                     className="menu menu-sm dropdown-content bg-gray-800 text-white rounded-box z-[1] mt-3 w-52 p-2 shadow"
                   >
                     <li>
-                      <Link to="/dashboard/profile">Profile</Link>
+                      <Link to="/dashboard/profile" className="text-red">
+                        Profile
+                      </Link>
                     </li>
                     <li>
-                      <Link to="/settings">Settings</Link>
+                      <Link to="/settings" className="">
+                        Settings
+                      </Link>
                     </li>
                     <li>
-                      <a onClick={handleLogout} role="button">
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left "
+                      >
                         Logout
-                      </a>
+                      </button>
                     </li>
                   </ul>
                 </div>

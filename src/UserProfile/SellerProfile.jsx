@@ -13,7 +13,9 @@ const formatTime = (date) => {
     .replace(" days", "d");
 };
 
-function SellerProfile({ seller }) {
+
+//
+function SellerProfile({ seller }) { //seller props was passed from carDetailsFetch inside of the PostAdPage
   const [showAdverts, setShowAdverts] = useState(false);
   const [revealPhone, setRevealPhone] = useState(false);
   const [revealEmail, setRevealEmail] = useState(false);
@@ -61,17 +63,18 @@ function SellerProfile({ seller }) {
               </button>
             </dd>
           </div>
-          <div className="py-3 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt className="text-sm font-medium text-black">Phone number</dt>
-            <dd className="mt-1 text-sm text-black sm:mt-0 sm:col-span-2">
-              <button
-                className="text-blue-500 hover:underline"
-                onClick={() => setRevealPhone(!revealPhone)}
-              >
-                {revealPhone ? seller.phoneNumber : "Show Phone Number"}
-              </button>
-            </dd>
-          </div>
+<div className="py-3 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+  <dt className="text-sm font-medium text-black">Phone number</dt>
+  <dd className="mt-1 text-sm text-black sm:mt-0 sm:col-span-2 flex items-center">
+    {revealPhone && <span className="mr-3">{seller.phone}</span>}
+    <button
+      className="text-blue-500 hover:underline"
+      onClick={() => setRevealPhone(!revealPhone)}
+    >
+      {revealPhone ? "Hide Phone Number" : "Show Phone Number"}
+    </button>
+  </dd>
+</div>
           <div className="py-3 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
             <dt className="text-sm font-medium text-black">Seller Since:</dt>
             <dd className="mt-1 text-sm text-black sm:mt-0 sm:col-span-2">

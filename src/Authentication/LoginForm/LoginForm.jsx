@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { loginUser } from "../../Slices/UserSlice";
-import { checkAuthStatus } from "../../Slices/AuthSlice"; // Assumes this handles session checks
+import { checkAuthStatus } from "../../Slices/AuthSlice"; // Assuming this handles session checks
 import GoogleIcon from "../../../src/assets/google.svg";
 import LoginImage from "../../assets/ecommercelede.png";
 import { ToastContainer, toast } from "react-toastify";
@@ -14,19 +14,15 @@ const LoginForm = () => {
   const redirectTo = location.state?.from || "/used-cars"; // Default redirect if state is null
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { isAuthenticated, loginError, loggingIn } = useSelector(
+    (state) => state.auth
+  );
 
-  // Select authentication state from AuthSlice
-  const { isAuthenticated, loginError, loggingIn } = useSelector((state) => ({
-    isAuthenticated: state.auth.isAuthenticated,
-    loginError: state.user.loginError,
-    loggingIn: state.user.loggingIn,
-  }));
-
-  console.log()
   const [formData, setFormData] = useState({
-    email: "",
+    email: "", // Changed from username to email to match the Redux slice
     password: "",
   });
+
   const [passwordError, setPasswordError] = useState("");
 
   useEffect(() => {
@@ -36,14 +32,14 @@ const LoginForm = () => {
   }, [loginError]);
 
   useEffect(() => {
-    if (isAuthenticated && location.pathname === "/login") {
-      // Redirect only after login
+    if (isAuthenticated) {
       toast.success("Login successful!");
       navigate(redirectTo);
     }
-  }, [isAuthenticated, navigate, redirectTo, location.pathname]);
+  }, [isAuthenticated, navigate, redirectTo]);
 
   const handleChange = (e) => {
+   
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
@@ -53,6 +49,7 @@ const LoginForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+     console.log("I have clicked this");
 
     if (!formData.email || !formData.password) {
       setPasswordError("Email and Password are required.");
@@ -62,15 +59,21 @@ const LoginForm = () => {
     setPasswordError("");
 
     try {
-      await dispatch(loginUser(formData)).unwrap();
-      // Check auth status after login
-      await dispatch(checkAuthStatus()).unwrap();
+      const resultAction = await dispatch(
+        loginUser({ email: formData.email, password: formData.password })
+      ).unwrap();
+      if (resultAction.userId) {
+        await dispatch(checkAuthStatus()); // Assuming checkAuthStatus updates the user session
+      } else {
+        throw new Error("User ID is missing in response");
+      }
     } catch (error) {
       toast.error(error.message || "Login failed. Please try again.");
       console.error("Login Submission Error:", error.message);
     }
   };
 
+  // Redirect to Google OAuth
   const handleGoogleSignIn = () => {
     const apiUrl = import.meta.env.VITE_API_URL;
     window.location.href = `${apiUrl}/auth/google`; // Your backend Google OAuth route

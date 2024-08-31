@@ -1,12 +1,11 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-
 function ProtectedRoute() {
   const location = useLocation();
- const { isAuthenticated } = useSelector((state) => state.auth);
-console.log('protected route', isAuthenticated)
-  // Fetch authentication status on mount
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
+  console.log("from protected route", isAuthenticated);
 
   // Redirect to login if not authenticated
   if (!isAuthenticated) {

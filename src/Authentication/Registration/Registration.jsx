@@ -1,11 +1,12 @@
+// RegistrationForm.jsx
+
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { registerUser } from "../../Slices/UserSlice";
-
-//import Logo from "../../assets/shopmart_logo.jpg";
+import GoogleLogo from "../../assets/google.svg"; // Path to your Google logo
 
 const RegistrationForm = () => {
   const dispatch = useDispatch();
@@ -22,26 +23,26 @@ const RegistrationForm = () => {
   });
 
   const [passwordError, setPasswordError] = useState("");
-  const [errorMessage, setErrorMessage] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/");
+      navigate("/login");
     }
   }, [isAuthenticated, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prevState) => ({
+      ...prevState,
       [name]: value,
-    });
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setPasswordError("");
-    setErrorMessage([]);
+    setErrorMessage("");
 
     if (formData.password !== formData.confirmPassword) {
       setPasswordError("Passwords do not match");
@@ -50,95 +51,150 @@ const RegistrationForm = () => {
 
     try {
       await dispatch(
-        registerUser({ email: formData.email, password: formData.password, username: formData.username })
+        registerUser({
+          email: formData.email,
+          password: formData.password,
+          username: formData.username,
+        })
       ).unwrap();
       toast.success("Registration successful!");
       setTimeout(() => {
         navigate("/login");
       }, 2000);
     } catch (error) {
-      setErrorMessage(error);
-      toast.error(error);
+      setErrorMessage(error.message || "Registration failed");
+      toast.error(error.message || "Registration failed");
     }
   };
 
+  const handleGoogleSignIn = () => {
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000"; // Fallback to localhost if env variable is not set
+    window.location.href = `${apiUrl}/auth/google`;
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900 flex justify-center">
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-      />
-      <div className="max-w-screen-xl m-0 sm:m-10 bg-white shadow sm:rounded-lg flex justify-center flex-1">
-        <div className="lg:w-1/2 xl:w-5/12 p-6 sm:p-12">
-          <div>
-            <img className="w-32 mx-auto" alt="Logo" />
-          </div>
-          <div className="mt-12 flex flex-col items-center">
-            <h1 className="text-2xl xl:text-3xl font-extrabold">Sign up</h1>
-            <div className="w-full flex-1 mt-8">
-              <form onSubmit={handleSubmit} className="mx-auto max-w-xs">
-                <input
-                  className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white mt-5"
-                  type="email"
-                  name="email"
-                  placeholder="Email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-                <input
-                  className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white mt-5"
-                  type="text"
-                  name="username"
-                  placeholder="Username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  required
-                />
-                <input
-                  className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white mt-5"
-                  type="password"
-                  name="password"
-                  placeholder="Password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
-                <input
-                  className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white mt-5"
-                  type="password"
-                  name="confirmPassword"
-                  placeholder="Confirm Password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  required
-                />
-                {passwordError && (
-                  <p className="text-red-500 text-xs italic">{passwordError}</p>
-                )}
-                {loginError && (
-                  <p className="text-red-500 text-xs italic">{loginError}</p>
-                )}
-                <button
-                  type="submit"
-                  className="mt-5 tracking-wide font-semibold bg-green-400 text-white w-full py-4 rounded-lg hover:bg-green-700 transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none"
-                  disabled={loggingIn}
-                >
-                  <span className="ml-3">Sign Up</span>
-                </button>
-              </form>
-            </div>
-          </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <ToastContainer position="top-right" autoClose={5000} />
+      <div className="bg-white shadow-md rounded-lg p-8 max-w-md w-full">
+        <h2 className="text-2xl font-bold text-center mb-6">
+          Create an Account
+        </h2>
+
+        {/* Google Sign-In Button */}
+        <button
+          onClick={handleGoogleSignIn}
+          className="flex items-center justify-center w-full py-2 mb-4 border border-gray-300 rounded-md hover:bg-gray-50 transition duration-200"
+        >
+          <img src={GoogleLogo} alt="Google Logo" className="w-6 h-6 mr-2" />
+          <span className="text-gray-700 font-medium">Sign up with Google</span>
+        </button>
+
+        <div className="flex items-center justify-center mb-4">
+          <span className="border-t border-gray-300 flex-grow mr-3"></span>
+          <span className="text-gray-500">or</span>
+          <span className="border-t border-gray-300 flex-grow ml-3"></span>
         </div>
-        <div className="flex-1 bg-green-100 text-center hidden lg:flex">
-          <div
-            className="m-12 xl:m-16 w-full bg-contain bg-center bg-no-repeat"
-            style={{
-              backgroundImage: `url('https://storage.googleapis.com/devitary-image-host.appspot.com/15848031292911696601-undraw_designer_life_w96d.svg')`,
-            }}
-          />
-        </div>
+
+        {/* Registration Form */}
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label
+              htmlFor="email"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              name="email"
+              id="email"
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              placeholder="you@example.com"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label
+              htmlFor="username"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              Username
+            </label>
+            <input
+              type="text"
+              name="username"
+              id="username"
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+              value={formData.username}
+              onChange={handleChange}
+              required
+              placeholder="Your username"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label
+              htmlFor="password"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              Password
+            </label>
+            <input
+              type="password"
+              name="password"
+              id="password"
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              placeholder="Your password"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label
+              htmlFor="confirmPassword"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              name="confirmPassword"
+              id="confirmPassword"
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              placeholder="Confirm your password"
+            />
+            {passwordError && (
+              <p className="text-red-500 text-sm mt-1">{passwordError}</p>
+            )}
+          </div>
+
+          {errorMessage && (
+            <p className="text-red-500 text-sm mb-4">{errorMessage}</p>
+          )}
+
+          <button
+            type="submit"
+            className="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200"
+            disabled={loggingIn}
+          >
+            {loggingIn ? "Signing up..." : "Sign Up"}
+          </button>
+        </form>
+
+        <p className="text-center text-gray-600 mt-6">
+          Already have an account?{" "}
+          <a href="/login" className="text-blue-600 hover:underline">
+            Log in
+          </a>
+        </p>
       </div>
     </div>
   );

@@ -1,42 +1,97 @@
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import socket from "../../UtilityFunctions/Socket";
 import axios from "axios";
-import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { formatDistanceToNow } from "date-fns";
 import Loader from "../../UtilityComponents/Loader";
-import AdvertCard from "../../UtilityComponents/SmallAdvertCard"; // Import the AdvertCard component
-import { useSelector } from "react-redux"; // Import useSelector
+import AdvertCard from "../../UtilityComponents/SmallAdvertCard";
+import { formatDistanceToNow } from "date-fns";
+import TokenExpiredModal from "../../UtilityComponents/TokenExpiredModal";
+import { logoutUser } from "../../Slices/AuthSlice";
 
 function ChatDetails() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const { chatId } = useParams();
+  const token = useSelector((state) => state.user?.token);
+  const userId = useSelector((state) => state.user?.userId);
+
   const [chat, setChat] = useState(null);
+  const [participants, setParticipants] = useState({});
+  const [advert, setAdvert] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [newMessage, setNewMessage] = useState(""); // State to hold the new message
+  const [newMessage, setNewMessage] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [sellerImage, setSellerImage] = useState(null);
 
   const apiUrl = import.meta.env.VITE_API_URL;
-
-  const currentUser = useSelector((state) => state.user); // Replace with your actual state slice
-  const userId = currentUser.userId;
+  const placeholderImage = "https://via.placeholder.com/150";
+  
 
   useEffect(() => {
     const fetchChatDetails = async () => {
       try {
-        setLoading(true);
-        const response = await axios.get(`${apiUrl}/user/messages/${chatId}`, {
+        const chatResponse = await axios.get(`${apiUrl}/chats/${chatId}`, {
+          headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
         });
+        setChat(chatResponse.data);
 
-        setChat(response.data);
+        const participantsMap = chatResponse.data.participants.reduce(
+          (acc, participant) => {
+            acc[participant._id] = participant.username;
+            return acc;
+          },
+          {}
+        );
+        setParticipants(participantsMap);
+
+        const advertResponse = await axios.get(
+          `${apiUrl}/adverts/${chatResponse.data.advertId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
+          }
+        );
+        setAdvert(advertResponse.data);
+        setSellerImage(advertResponse.data.imageUrls[0]);
       } catch (error) {
-        console.error("Error fetching chat details:", error);
-        setError("Failed to load chat details");
+        if (error?.response?.status === 500) {
+          setShowModal(true);
+        } else {
+          console.error("Failed to fetch chat or advert details:", error);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchChatDetails();
-  }, [chatId]);
+
+    socket.emit("joinRoom", { chatId });
+
+    socket.on("receiveMessage", (message) => {
+      setChat((prevChat) => {
+        const isDuplicate = prevChat.messages.some(
+          (msg) => msg._id === message._id
+        );
+
+        if (isDuplicate) {
+          return prevChat;
+        }
+
+        return {
+          ...prevChat,
+          messages: [...prevChat.messages, message],
+        };
+      });
+    });
+
+    return () => {
+      socket.off("receiveMessage");
+    };
+  }, [chatId, token, apiUrl]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -45,111 +100,130 @@ function ChatDetails() {
 
     try {
       const response = await axios.post(
-        `${apiUrl}/user/messages/${chatId}/reply`,
+        `${apiUrl}/chats/${chatId}/messages`,
         { content: newMessage },
         {
+          headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
         }
       );
 
-      // Update the chat with the new message
+      const sentMessage = response.data.chat.messages.pop();
+
       setChat((prevChat) => ({
         ...prevChat,
-        messages: [...prevChat.messages, response.data],
+        messages: [...prevChat.messages, sentMessage],
       }));
 
-      setNewMessage(""); // Clear the input field
+      socket.emit("sendMessage", {
+        chatId,
+        message: sentMessage,
+      });
+
+      setNewMessage("");
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("Failed to send message:", error);
     }
   };
 
+  const handleSignOut = () => {
+    dispatch(logoutUser());
+    navigate("/login");
+  };
+
   if (loading) return <Loader />;
-  if (error) return <div>{error}</div>;
-  if (!chat) return <div>No chat found</div>;
+  if (showModal) {
+    return <TokenExpiredModal onSignOut={handleSignOut} />;
+  }
 
-  const placeholderImage = "https://via.placeholder.com/150"; // Placeholder image URL
-
-  // Identifying the seller by the postedBy field
-  const sellerId = chat.advertId?.postedBy;
-  const advertImage = chat.advertId?.imageUrls[0] || placeholderImage;
-
-  // Find the other participant (the one we are chatting with)
-  const otherParticipant = chat.participants.find((p) => p._id !== userId);
+  const otherParticipant = chat?.participants.find((p) => p._id !== userId);
+ 
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto py-8 px-4 bg-white dark:bg-gray-800 text-black dark:text-white">
       <h2 className="text-2xl font-bold mb-4">
-        Chat with {otherParticipant?.username}
+        Chat with {otherParticipant?.username || "Participant"}
       </h2>
-      {/* Advert Card */}
-      <AdvertCard advert={chat.advertId} />
 
-      <div className="bg-white p-4 rounded-lg shadow-md mb-4">
-        {chat.messages.map((message) => {
-          const isCurrentUser = message.sender._id === userId;
-          const isSeller = message.sender._id === sellerId;
+      {advert ? <AdvertCard advert={advert} /> : <div>Loading advert...</div>}
 
-          // Use the advert image if the sender is the seller, otherwise use the placeholder image
-          const profileImage = isSeller ? advertImage : placeholderImage;
+      <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-md mb-4">
+        {chat?.messages
+          .filter((message) => message.sender && message.content)
+          .map((message) => {
+            const senderId = message.sender?._id || message.sender;
+            const senderName = participants[senderId] || "Unknown";
+            const isCurrentUser = senderId === userId;
 
-          return (
-            <div
-              key={message._id}
-              className={`flex items-start mb-4 ${
-                isCurrentUser ? "justify-start" : "justify-end"
-              }`}
-              style={{
-                flexDirection: isCurrentUser ? "row" : "row-reverse",
-              }}
-            >
+            const messageAlignment = isCurrentUser
+              ? "justify-end"
+              : "justify-start";
+            const marginAlignment = isCurrentUser ? "ml-auto" : "mr-auto";
+
+            let formattedDate = "Invalid date";
+            try {
+              const messageDate = new Date(message.sentAt);
+              if (!isNaN(messageDate.getTime())) {
+                formattedDate = formatDistanceToNow(messageDate, {
+                  addSuffix: true,
+                });
+              }
+            } catch (error) {
+              console.error("Error parsing date:", error);
+            }
+
+                   const isMessageFromSeller =
+                     senderId === advert?.postedBy._id;
+
+            console.log("this is userId", userId);
+
+            const isSeller = userId === advert?.postedBy._id;
+            console.log("this is sender ID", senderId);
+            console.log("this is advert id", advert?.postedBy._id);
+            console.log("I am the seller", isSeller);
+            return (
               <div
-                className={`flex items-start ${
-                  isCurrentUser ? "mr-auto" : "ml-auto"
-                }`}
-                style={{
-                  maxWidth: "70%",
-                  textAlign: isCurrentUser ? "left" : "right",
-                }}
+                key={message._id}
+                className={`flex items-start mb-4 ${messageAlignment}`}
               >
-                <img
-                  src={profileImage}
-                  alt={message.sender.username}
-                  className="w-10 h-10 rounded-full object-cover mx-4"
-                />
-                <div
-                  className={`p-3 rounded-lg ${
-                    isCurrentUser
-                      ? "bg-gray-100 text-black"
-                      : "bg-green-500 text-white"
-                  }`}
-                >
-                  <p className="font-semibold">{message.sender.username}</p>
-                  <p>{message.content}</p>
-                  <span className="text-white-500 text-xs">
-                    {formatDistanceToNow(new Date(message.sentAt), {
-                      addSuffix: true,
-                    })}
-                  </span>
+                <div className={`flex items-start ${marginAlignment}`}>
+                  <img
+                    src={isMessageFromSeller ? sellerImage : placeholderImage}
+                    alt={
+                      isMessageFromSeller ? "Seller Profile" : "User Profile"
+                    }
+                    className="w-10 h-10 rounded-full mr-3"
+                  />
+                  <div
+                    className={`p-3 rounded-lg ${
+                      isCurrentUser
+                        ? "bg-green-800 text-white"
+                        : "bg-gray-800 text-white"
+                    }`}
+                  >
+                    <span className="font-semibold">{senderName}</span>
+                    <p>{message.content}</p>
+                    <span className="text-gray-300 text-xs">
+                      {formattedDate}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
       </div>
 
-      {/* Reply Text Bar */}
       <form onSubmit={handleSendMessage} className="flex items-center">
         <input
           type="text"
-          className="flex-grow border rounded-lg p-2 mr-4"
+          className="flex-grow border rounded-lg p-2 mr-4 bg-white dark:bg-gray-700 text-black dark:text-white"
           placeholder="Type your message..."
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
         />
         <button
           type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+          className="bg-green-800 text-white px-4 py-2 rounded-lg hover:bg-green-700"
         >
           Send
         </button>

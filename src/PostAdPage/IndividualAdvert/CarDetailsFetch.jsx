@@ -21,8 +21,14 @@ import CarInformation from "./CarInfoTab/CarInformation";
 import CarInteriorCard from "./CarInfoTab/CarInteriorCard";
 import EnvironmentalFeatures from "./CarInfoTab/EnvironmentalFeatures";
 import AdvertDescription from "./AdvertDescription";
+import { useSelector } from "react-redux";
 
 function CarDetailsFetch() {
+
+  const { token } = useSelector((state) => state.user);
+  console.log('send message', token)
+
+
   const location = useLocation();
   const { id: advertId } = useParams();
   const [advert, setAdvert] = useState(null);
@@ -38,11 +44,14 @@ function CarDetailsFetch() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [currentUserId, setCurrentUserId] = useState(null);
 
+
   const apiUrl = import.meta.env.VITE_API_URL;
   useEffect(() => {
     // Scroll to the top of the page on location change
     window.scrollTo(0, 0);
   }, [location]);
+
+ 
 
   useEffect(() => {
     const fetchOptions = async () => {
@@ -54,19 +63,13 @@ function CarDetailsFetch() {
         setAdvert(advertResponse.data);
         setMainImage(advertResponse.data.imageUrls[0]);
 
-        // Fetch current user's profile
-        const userResponse = await axios.get(`${apiUrl}/profile`, {
-          withCredentials: true,
-        });
-
-        setCurrentUserId(userResponse.data.user._id);
-
         // Fetch seller information based on postedBy ID from advert
         const sellerResponse = await axios.get(
           `${apiUrl}/profile/${advertResponse.data.postedBy._id}`
         );
+        console.log(sellerResponse.data)
         setSeller(sellerResponse.data);
-        setPhoneNumber(sellerResponse.data.phoneNumber);
+        setPhoneNumber(sellerResponse.data.phone);
       } catch (error) {
         console.error("Error fetching options:", error);
         setError(error.message || "An error occurred while fetching data.");
@@ -105,14 +108,23 @@ function CarDetailsFetch() {
     setShowBidModal(false);
   };
 
+
+
+//Sending message
   const handleSendMessage = async () => {
     try {
       const response = await axios.post(
-        `${apiUrl}/user/send-message`,
+        `${apiUrl}/chats/${advert._id}`,
+
         {
-          recipientId: advert.postedBy._id,
+          
+          receiverId: advert.postedBy._id,
           content: message,
-          advertId: advert._id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
         { withCredentials: true }
       );
@@ -127,8 +139,15 @@ function CarDetailsFetch() {
       alert(`Message sent successfully to ${recipient.username}!`);
     } catch (error) {
       console.error("Error sending message:", error);
+      if (error.response && error.response.data.error) {
+        alert(`Error: ${error.response.data.error}`);
+      } else {
+        alert("An unexpected error occurred. Please try again.");
+      }
     }
-    setShowMessageModal(false);
+
+    setMessage(""); // Reset message input
+    setShowMessageModal(false); // Close modal
   };
 
   return (

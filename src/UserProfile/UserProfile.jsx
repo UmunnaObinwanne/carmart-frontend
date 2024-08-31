@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useSelector } from "react-redux";
 
 const UserProfile = () => {
   const apiUrl = import.meta.env.VITE_API_URL;
+  const { userId, token } = useSelector((state) => state.user);
 
   const [profile, setProfile] = useState({
     username: "",
@@ -17,6 +19,7 @@ const UserProfile = () => {
     ZIP: "",
     phone: "",
   });
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -24,10 +27,10 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get(`${apiUrl}/profile`, {
-          withCredentials: true, // Include cookies in the request
+        const response = await axios.get(`${apiUrl}/profile/${userId}`, {
+          withCredentials: true,
         });
-        const userData = response.data.user || {};
+        const userData = response.data || {};
         setProfile({
           username: userData.username || "",
           email: userData.email || "",
@@ -46,7 +49,7 @@ const UserProfile = () => {
       }
     };
     fetchProfile();
-  }, [apiUrl]);
+  }, [apiUrl, userId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,7 +63,10 @@ const UserProfile = () => {
     e.preventDefault();
     try {
       const response = await axios.put(`${apiUrl}/profile`, profile, {
-        withCredentials: true, // Include cookies in the request
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
       });
 
       setProfile(response.data);
@@ -95,7 +101,7 @@ const UserProfile = () => {
           <input
             type="text"
             name="username"
-            value={profile.username}
+            value={profile.username || ""}
             onChange={handleChange}
             className="w-full px-3 py-2 border rounded-lg"
           />
@@ -105,7 +111,7 @@ const UserProfile = () => {
           <input
             type="email"
             name="email"
-            value={profile.email}
+            value={profile.email || ""}
             onChange={handleChange}
             className="w-full px-3 py-2 border rounded-lg"
           />
@@ -115,7 +121,7 @@ const UserProfile = () => {
           <input
             type="text"
             name="profilePicture"
-            value={profile.profilePicture}
+            value={profile.profilePicture || ""}
             onChange={handleChange}
             className="w-full px-3 py-2 border rounded-lg"
           />
@@ -125,7 +131,7 @@ const UserProfile = () => {
           <input
             type="text"
             name="Location"
-            value={profile.Location}
+            value={profile.Location || ""}
             onChange={handleChange}
             className="w-full px-3 py-2 border rounded-lg"
           />
@@ -135,7 +141,7 @@ const UserProfile = () => {
           <input
             type="text"
             name="City"
-            value={profile.City}
+            value={profile.City || ""}
             onChange={handleChange}
             className="w-full px-3 py-2 border rounded-lg"
           />
@@ -145,7 +151,7 @@ const UserProfile = () => {
           <input
             type="text"
             name="Area"
-            value={profile.Area}
+            value={profile.Area || ""}
             onChange={handleChange}
             className="w-full px-3 py-2 border rounded-lg"
           />
@@ -155,7 +161,7 @@ const UserProfile = () => {
           <input
             type="text"
             name="Street"
-            value={profile.Street}
+            value={profile.Street || ""}
             onChange={handleChange}
             className="w-full px-3 py-2 border rounded-lg"
           />
@@ -165,7 +171,7 @@ const UserProfile = () => {
           <input
             type="text"
             name="ZIP"
-            value={profile.ZIP}
+            value={profile.ZIP || ""}
             onChange={handleChange}
             className="w-full px-3 py-2 border rounded-lg"
           />
@@ -175,7 +181,7 @@ const UserProfile = () => {
           <input
             type="text"
             name="phone"
-            value={profile.phone}
+            value={profile.phone || ""}
             onChange={handleChange}
             className="w-full px-3 py-2 border rounded-lg"
           />
