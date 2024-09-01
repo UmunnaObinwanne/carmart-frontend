@@ -1,30 +1,37 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-// Define initial state
 const initialState = {
   user: null,
-  userId: null, // Store userId separately
-  token: null, // Store JWT token
+  userId: null,
   isAuthenticated: false,
   loginError: null,
   loggingIn: false,
   loading: false,
-  userHistory: [], // New state to hold user history
+  userHistory: [],
 };
 
 const apiUrl = import.meta.env.VITE_API_URL;
 console.log(apiUrl);
 
+// Create an axios instance with default config
+const api = axios.create({
+  baseURL: apiUrl,
+  headers: {
+    "Content-Type": "application/json",
+  },
+  withCredentials: true, // This is important for sending and receiving cookies
+});
+
 export const registerUser = createAsyncThunk(
   "user/register",
   async ({ username, email, password }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(
-        `${apiUrl}/register`,
-        { username, email, password },
-        { headers: { "Content-Type": "application/json" } }
-      );
+      const response = await api.post("/register", {
+        username,
+        email,
+        password,
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -34,22 +41,15 @@ export const registerUser = createAsyncThunk(
   }
 );
 
-// Define login action
 export const loginUser = createAsyncThunk(
   "user/login",
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(
-        `${apiUrl}/login`,
-        { email, password },
-        {
-          withCredentials: true,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-      // Assuming the response data includes a JWT token and userId
-      console.log(response.data)
-      return response.data; // Expecting { token: "jwt_token_here", userId: "some_id" }
+      const response = await api.post("/login", { email, password });
+      console.log(response.data);
+      // The token should be set as an HttpOnly cookie by the server
+      // We don't need to manually handle it here
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || "Login failed");
     }
@@ -63,8 +63,8 @@ export const userSlice = createSlice({
     logout(state) {
       state.isAuthenticated = false;
       state.userId = null;
-      state.token = null; // Clear token on logout
-      state.userHistory = []; // Clear user history on logout
+      state.user = null;
+      state.userHistory = [];
     },
   },
   extraReducers: (builder) => {
@@ -77,8 +77,7 @@ export const userSlice = createSlice({
       .addCase(registerUser.fulfilled, (state, action) => {
         state.registering = false;
         state.registrationSuccess = true;
-        state.userId = action.payload.userId; // Ensure userId is set correctly
-        state.token = action.payload.token; // Store token if included in the response
+        state.userId = action.payload.userId;
         state.isAuthenticated = true;
       })
       .addCase(registerUser.rejected, (state, action) => {
@@ -95,9 +94,9 @@ export const userSlice = createSlice({
         state.loggingIn = false;
         state.loginError = null;
         state.isAuthenticated = true;
-        state.userId = action.payload.userId; // Store userId directly
+        state.userId = action.payload.userId;
+        state.user = { userId: action.payload.userId };
         state.token = action.payload.token; // Store JWT token
-        state.user = { userId: action.payload.userId }; // Optionally store user object with userId
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loggingIn = false;

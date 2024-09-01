@@ -3,46 +3,44 @@ import axios from "axios";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
-// Thunk to check authentication status
+// Create an axios instance with default config
+const api = axios.create({
+  baseURL: apiUrl,
+  withCredentials: true,
+});
+
 export const checkAuthStatus = createAsyncThunk(
   "auth/checkStatus",
-  async (_, { getState, rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      // Send request to auth-check endpoint
-      const response = await axios.get(`${apiUrl}/auth-check`, {
-        withCredentials: true,
-      });
+      const response = await api.get("/auth-check");
+      console.log('auth check', response)
 
-      const { authenticated } = response.data; // Only authenticated is returned
-      const state = getState();
-      const currentUserId = state.auth.userId;
-
-      // Here, we don't need to compare userId if the API doesn't provide it
-      if (authenticated) {
-        console.log(authenticated, currentUserId)
-        return { authenticated, userId: currentUserId }; // Return the current userId from state
+      if (response.data.authenticated && response.data.userId) {
+        return {
+          authenticated: true,
+          userId: response.data.userId,
+          // If you add more user info on the server, you can include it here
+        };
       } else {
-        throw new Error("User is not authenticated");
+        throw new Error("User is not authenticated or userId is missing");
       }
     } catch (error) {
+      if (error.response && error.response.status === 401) {
+        // Unauthorized, user is not authenticated
+        return { authenticated: false, userId: null };
+      }
       return rejectWithValue(error.message || "Auth check failed");
     }
   }
 );
 
-// Handle Logout
 export const logoutUser = createAsyncThunk(
   "user/logout",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.post(
-        `${apiUrl}/logout`,
-        {},
-        {
-          withCredentials: true,
-        }
-      );
-      return response;
+      await api.post("/logout");
+      return { success: true };
     } catch (error) {
       return rejectWithValue(error.response?.data?.error || "Logout failed");
     }
@@ -57,12 +55,7 @@ const authSlice = createSlice({
     error: null,
     userId: null,
   },
-  reducers: {
-    logout(state) {
-      state.isAuthenticated = false;
-      state.userId = null;
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(checkAuthStatus.pending, (state) => {
@@ -71,24 +64,25 @@ const authSlice = createSlice({
       .addCase(checkAuthStatus.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.isAuthenticated = action.payload.authenticated;
-        state.userId = action.payload.userId; // Update userId from the state
+        state.userId = action.payload.userId;
+        state.error = null;
       })
       .addCase(checkAuthStatus.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.error.message;
+        state.error = action.payload;
         state.isAuthenticated = false;
         state.userId = null;
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.isAuthenticated = false;
         state.userId = null;
+        state.status = "idle";
+        state.error = null;
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.error = action.payload;
       });
   },
 });
-
-export const { logout } = authSlice.actions;
 
 export default authSlice.reducer;
