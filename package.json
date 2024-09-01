@@ -56,5 +56,5 @@
   "main": "postcss.config.js",
   "author": "",
   "license": "ISC",
-  "proxy": "http://localhost:5000"
+  "proxy": "https://carmart-server.onrender.com"
 }
