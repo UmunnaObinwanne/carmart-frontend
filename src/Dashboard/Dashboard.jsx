@@ -85,23 +85,16 @@ const tabData = [
     icon: SettingsIcon,
     component: <UserProfile />,
   },
-  {
-    label: "Favorites",
-    value: "favorites",
-    icon: FavoritesIcon,
-    component: <div>Favorites Component</div>,
-  },
 ];
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const defaultTab = tabData[0].value;
   const [activeTab, setActiveTab] = useState(() => {
     const path = location.pathname.split("/").pop();
     const activeTab = tabData.find((tab) => tab.value === path);
-    return activeTab ? activeTab.value : defaultTab;
+    return activeTab ? activeTab.value : tabData[0].value;
   });
 
   useEffect(() => {
@@ -112,8 +105,19 @@ export default function Dashboard() {
     setActiveTab(value);
   };
 
+  const goBack = () => {
+  navigate('/')
+  };
+
   return (
     <div className="flex flex-col w-full h-screen">
+      {/* Back Link */}
+      <div className="w-full p-4 bg-blue-500 text-white text-center">
+        <button onClick={goBack} className="text-white underline">
+          Go Back to Home
+        </button>
+      </div>
+
       {/* Tab Navigation */}
       <div className="flex overflow-x-auto mb-4 w-full bg-gray-100 shadow-md py-3 px-2">
         {tabData.map(({ label, value, icon: Icon }) => (
@@ -131,6 +135,7 @@ export default function Dashboard() {
           </button>
         ))}
       </div>
+
       {/* Tab Content */}
       <div className="flex-grow w-full overflow-auto">
         {tabData.map(

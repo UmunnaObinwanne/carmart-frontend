@@ -19,7 +19,10 @@ const CarInformation = ({ advert }) => {
           <FaRoad className="text-gray-500 mr-2" />
           <div>
             <p className="text-gray-500 text-xs font-semibold">Mileage:</p>
-            <p className=" text-xl">{advert.mileage || "Unknown"} miles</p>
+            <p className=" text-xl">
+              {new Intl.NumberFormat("en-GB").format(advert.mileage) || "Unknown"}{" "}
+              miles
+            </p>
           </div>
         </div>
         <div className="border p-2 rounded-md bg-white flex items-center">
@@ -40,7 +43,7 @@ const CarInformation = ({ advert }) => {
           <FaBolt className="text-gray-500 mr-2" />
           <div>
             <p className="text-gray-500 text-xs font-semibold">Acceleration:</p>
-            <p className=" text-xl">{advert.acceleration || "Unknown"} s</p>
+            <p className=" text-xl">{advert.acceleration || "Unknown"} m/s</p>
           </div>
         </div>
         <div className="border p-2 rounded-md bg-white flex items-center">

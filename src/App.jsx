@@ -9,7 +9,6 @@ import CarGrid from "./CarDisplay/CarGrid";
 import UserProfile from "./UserProfile/UserProfile";
 import Dashboard from "./Dashboard/Dashboard";
 import AdsBackend from "./Dashboard/AdsTab/AdsBackend";
-import Test from "./Test";
 import CarDetailsFetch from "./PostAdPage/IndividualAdvert/CarDetailsFetch";
 import MessagesList from "./Dashboard/Messages/MessageList";
 import ChatDetails from "./Dashboard/Messages/ChatDetails";
@@ -17,6 +16,7 @@ import SellerProfile from "./UserProfile/SellerProfile";
 import PageDetails from "./ContentManagement/PageDetails";
 import HomepageContainer from "./Homepage-Components/HomepageContainer";
 import LoginRedirect from "./UtilityComponents/LoginRedirect";
+import EditAd from "./Dashboard/AdsTab/EditAd";
 
 function App() {
   return (
@@ -35,10 +35,12 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/used-cars/:id" element={<CarDetailsFetch />} />
             <Route path="/post-ad" element={<PostAd />} />
+            <Route path="/edit-ad/:id" element={<EditAd />} />
 
             <Route path="/chats/:chatId" element={<ChatDetails />} />
             <Route path="/dashboard" element={<Dashboard />}>
               <Route path="/dashboard/my-ads" element={<AdsBackend />} />
+
               <Route path="/dashboard/messages" element={<MessagesList />} />
               <Route path="/dashboard/profile" element={<UserProfile />} />
             </Route>

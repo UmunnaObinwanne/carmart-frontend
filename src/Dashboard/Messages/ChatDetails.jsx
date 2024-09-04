@@ -25,14 +25,13 @@ function ChatDetails() {
   const [showModal, setShowModal] = useState(false);
   const [sellerImage, setSellerImage] = useState(null);
 
-  const apiUrl = import.meta.env.VITE_API_URL;
   const placeholderImage = "https://via.placeholder.com/150";
   
 
   useEffect(() => {
     const fetchChatDetails = async () => {
       try {
-        const chatResponse = await axios.get(`${apiUrl}/chats/${chatId}`, {
+        const chatResponse = await axios.get(`/api/chats/${chatId}`, {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
         });
@@ -48,7 +47,7 @@ function ChatDetails() {
         setParticipants(participantsMap);
 
         const advertResponse = await axios.get(
-          `${apiUrl}/adverts/${chatResponse.data.advertId}`,
+          `/api/adverts/${chatResponse.data.advertId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
             withCredentials: true,
@@ -91,7 +90,7 @@ function ChatDetails() {
     return () => {
       socket.off("receiveMessage");
     };
-  }, [chatId, token, apiUrl]);
+  }, [chatId, token]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -100,7 +99,7 @@ function ChatDetails() {
 
     try {
       const response = await axios.post(
-        `${apiUrl}/chats/${chatId}/messages`,
+        `/api/chats/${chatId}/messages`,
         { content: newMessage },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -174,13 +173,7 @@ function ChatDetails() {
 
                    const isMessageFromSeller =
                      senderId === advert?.postedBy._id;
-
-            console.log("this is userId", userId);
-
-            const isSeller = userId === advert?.postedBy._id;
-            console.log("this is sender ID", senderId);
-            console.log("this is advert id", advert?.postedBy._id);
-            console.log("I am the seller", isSeller);
+        
             return (
               <div
                 key={message._id}

@@ -8,13 +8,12 @@ function SendMessage() {
   const [recipientId, setRecipientId] = useState("");
   const userId = useSelector((state) => state.user.userId);
 
-  const apiUrl = import.meta.env.VITE_API_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await axios.post(
-        `${apiUrl}/user/send-messages`,
+        '/api/user/send-messages',
         { recipientId, content },
         {
           withCredentials: true,

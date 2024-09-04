@@ -43,43 +43,48 @@ function CarDetailsFetch() {
   const [message, setMessage] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [highestBid, setHighestBid] = useState('')
 
 
-  const apiUrl = import.meta.env.VITE_API_URL;
   useEffect(() => {
     // Scroll to the top of the page on location change
     window.scrollTo(0, 0);
   }, [location]);
 
  
+useEffect(() => {
+  const fetchOptions = async () => {
+    try {
+      setLoading(true);
 
-  useEffect(() => {
-    const fetchOptions = async () => {
-      try {
-        setLoading(true);
+      const advertResponse = await axios.get(`/api/adverts/${advertId}`);
+      setAdvert(advertResponse.data);
 
-        // Fetch advert information
-        const advertResponse = await axios.get(`${apiUrl}/adverts/${advertId}`);
-        setAdvert(advertResponse.data);
-        setMainImage(advertResponse.data.imageUrls[0]);
+      // Extracting bids and finding the highest bid
+      const allBids = advertResponse.data.bids || [];
+      const highestBid =
+        allBids.length > 0
+          ? Math.max(...allBids.map((bid) => bid.amount))
+          : null;
 
-        // Fetch seller information based on postedBy ID from advert
-        const sellerResponse = await axios.get(
-          `${apiUrl}/profile/${advertResponse.data.postedBy._id}`
-        );
-        console.log(sellerResponse.data)
-        setSeller(sellerResponse.data);
-        setPhoneNumber(sellerResponse.data.phone);
-      } catch (error) {
-        console.error("Error fetching options:", error);
-        setError(error.message || "An error occurred while fetching data.");
-      } finally {
-        setLoading(false);
-      }
-    };
+      setHighestBid(highestBid);
+      setMainImage(advertResponse.data.imageUrls[0]);
 
-    fetchOptions();
-  }, [advertId]);
+      const sellerResponse = await axios.get(
+        `/api/profile/${advertResponse.data.postedBy._id}`
+      );
+      setSeller(sellerResponse.data);
+      setPhoneNumber(sellerResponse.data.phone);
+    } catch (error) {
+      setError(error.message || "An error occurred while fetching data.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchOptions();
+}, [advertId]);
+
 
   if (loading) return <Loader />;
   if (error) return <div>{error}</div>;
@@ -95,18 +100,27 @@ function CarDetailsFetch() {
     maximumFractionDigits: 0,
   }).format(advert.price);
 
-  const handleBidSubmit = async () => {
-    try {
-      await axios.post(`${apiUrl}/bids`, {
-        advertId,
-        amount: bidAmount,
-      });
-      alert("Bid submitted successfully!");
-    } catch (error) {
-      console.error("Error submitting bid:", error);
-    }
-    setShowBidModal(false);
-  };
+
+const handleBidSubmit = async () => {
+  try {
+    await axios.post(`/api/bids`, {
+      advertId,
+      amount: bidAmount,
+    });
+
+    alert("Bid submitted successfully!");
+
+    // Update the highest bid locally
+    setHighestBid((prevHighestBid) => Math.max(prevHighestBid, bidAmount));
+
+    // Optionally, re-fetch the advert to get updated bid data
+    const response = await axios.get(`/api/adverts/${advertId}`);
+    setAdvert(response.data);
+  } catch (error) {
+    console.error("Error submitting bid:", error);
+  }
+  setShowBidModal(false);
+};
 
 
 
@@ -114,7 +128,7 @@ function CarDetailsFetch() {
   const handleSendMessage = async () => {
     try {
       const response = await axios.post(
-        `${apiUrl}/chats/${advert._id}`,
+        `/api/chats/${advert._id}`,
 
         {
           
@@ -130,7 +144,6 @@ function CarDetailsFetch() {
       );
 
       const chat = response.data.chat;
-      console.log("Chat details:", chat);
 
       const recipient = chat.participants.find(
         (participant) => participant._id !== currentUserId
@@ -190,7 +203,7 @@ function CarDetailsFetch() {
                   </div>
                   <div className="flex items-center ml-auto">
                     <FaLocationArrow className="w-5 h-5 mr-1 text-gray-700" />
-                    <span>{advert.city}</span>,
+                    <span>{advert.city}</span>,{" "}
                     <span className="text-gray-500 ml-1">{advert.country}</span>
                   </div>
                 </div>
@@ -230,32 +243,56 @@ function CarDetailsFetch() {
 
                 <hr className="my-4 border-gray-300" />
 
-                <div className="flex flex-wrap gap-4 mb-4 items-center">
-                  <button
-                    onClick={() => setShowBidModal(true)}
-                    className="btn btn-primary shadow-md w-full sm:w-auto transition-transform duration-300 hover:scale-105"
-                  >
-                    Make a Bid
-                  </button>
-                  <button
-                    onClick={() => setShowMessageModal(true)}
-                    className="btn btn-secondary shadow-md w-full sm:w-auto transition-transform duration-300 hover:scale-105"
-                  >
-                    Compose Message
-                  </button>
-                  <button
-                    onClick={() => setRevealPhone(!revealPhone)}
-                    className="btn btn-accent w-full sm:w-auto transition-transform duration-300 hover:scale-105"
-                  >
-                    {revealPhone
-                      ? "Hide Phone Number"
-                      : "Show seller's Phone Number"}
-                  </button>
-                  {revealPhone && (
-                    <Link className="link link-accent w-full sm:w-auto text-blue-600 hover:underline">
-                      {phoneNumber}
-                    </Link>
-                  )}
+                {/* Buttons Section */}
+                <div className="flex flex-col gap-4 mb-4">
+                  {/* First row: Make a Bid and Send Message buttons */}
+                  <div className="flex flex-wrap items-center gap-4">
+                    <button
+                      onClick={() => setShowBidModal(true)}
+                      className="btn btn-primary shadow-md w-full sm:w-auto transition-transform duration-300 hover:scale-105"
+                    >
+                      Make a Bid
+                    </button>
+                    <button
+                      onClick={() => setShowMessageModal(true)}
+                      className="btn btn-secondary shadow-md w-full sm:w-auto transition-transform duration-300 hover:scale-105"
+                    >
+                      Send Message
+                    </button>
+                  </div>
+
+                  {/* Second row: Reveal Phone Number button and phone number */}
+                  <div className="flex flex-wrap items-center gap-4">
+                    <button
+                      onClick={() => setRevealPhone(!revealPhone)}
+                      className="btn btn-accent w-full sm:w-auto transition-transform duration-300 hover:scale-105"
+                    >
+                      {revealPhone
+                        ? "Hide Phone Number"
+                        : "Reveal Phone Number"}
+                    </button>
+                    {revealPhone && (
+                      <div className="text-blue-600 hover:underline">
+                        {phoneNumber}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Highest Bid:
+                  </h3>
+                  <p className="text-xl text-gray-600">
+                    {highestBid
+                      ? new Intl.NumberFormat("en-GB", {
+                          style: "currency",
+                          currency: "GBP",
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 0,
+                        }).format(highestBid)
+                      : "No bids yet"}
+                  </p>
                 </div>
               </div>
             </main>
@@ -323,10 +360,7 @@ function CarDetailsFetch() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
               <Tabs aria-label="Default tabs" variant="default">
-                <Tabs.Item active title="Seller Profile" icon={HiUserCircle}>
-                  {seller ? <SellerProfile seller={seller} /> : <Loader />}
-                </Tabs.Item>
-                <Tabs.Item title="Specifications" icon={MdDashboard}>
+                <Tabs.Item active title="Specifications" icon={MdDashboard}>
                   <CarInformation key={advert._id} advert={advert} />
                 </Tabs.Item>
                 <Tabs.Item title="Car Features" icon={HiAdjustments}>
@@ -337,6 +371,9 @@ function CarDetailsFetch() {
                   icon={HiClipboardList}
                 >
                   <EnvironmentalFeatures advert={advert} />
+                </Tabs.Item>
+                <Tabs.Item title="Seller Profile" icon={HiUserCircle}>
+                  {seller ? <SellerProfile seller={seller} /> : <Loader />}
                 </Tabs.Item>
               </Tabs>
             </div>

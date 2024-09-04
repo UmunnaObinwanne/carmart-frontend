@@ -1,13 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 
-function Location({ onChange }) {
-  const [postalCode, setPostalCode] = useState("");
-  const [city, setCity] = useState("");
-  const [country, setCountry] = useState("");
+function Location({
+  initialPostalCode,
+  initialCity,
+  initialCountry,
+  onChange,
+}) {
+  const [postalCode, setPostalCode] = useState(initialPostalCode || "");
+  const [city, setCity] = useState(initialCity || "");
+  const [country, setCountry] = useState(initialCountry || "");
   const [error, setError] = useState("");
 
   const apiKey = `${import.meta.env.VITE_LOCATION_FINDER}`;
+
+  useEffect(() => {
+    setPostalCode(initialPostalCode || "");
+    setCity(initialCity || "");
+    setCountry(initialCountry || "");
+  }, [initialPostalCode, initialCity, initialCountry]);
 
   const handlePostalCodeChange = async (e) => {
     const value = e.target.value;
@@ -48,8 +59,6 @@ function Location({ onChange }) {
   return (
     <>
       <div className="mb-6">
-        {" "}
-        {/* Added mb-6 to add spacing between inputs */}
         <label
           htmlFor="postalCode"
           className="font-mono px-3 py-3 mt-1 bg-gray-100 w-full text-sm lg:text-base bg-gray-900 text-white border-b-2 rounded mb-3"
@@ -66,8 +75,6 @@ function Location({ onChange }) {
       </div>
 
       <div className="mb-6">
-        {" "}
-        {/* Added mb-6 to add spacing between inputs */}
         <label
           htmlFor="city"
           className="font-mono px-3 py-3 mt-1 bg-gray-100 w-full text-sm lg:text-base bg-gray-900 text-white border-b-2 rounded mb-3"
@@ -84,8 +91,6 @@ function Location({ onChange }) {
       </div>
 
       <div className="mb-6">
-        {" "}
-        {/* Added mb-6 to add spacing between inputs */}
         <label
           htmlFor="country"
           className="font-mono px-3 py-3 mt-1 bg-gray-100 w-full text-sm lg:text-base bg-gray-900 text-white border-b-2 rounded mb-3"

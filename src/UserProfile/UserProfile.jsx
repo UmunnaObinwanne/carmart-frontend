@@ -5,7 +5,6 @@ import "react-toastify/dist/ReactToastify.css";
 import { useSelector } from "react-redux";
 
 const UserProfile = () => {
-  const apiUrl = import.meta.env.VITE_API_URL;
   const { userId, token } = useSelector((state) => state.user);
 
   const [profile, setProfile] = useState({
@@ -27,7 +26,7 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get(`${apiUrl}/profile/${userId}`, {
+        const response = await axios.get(`/api/profile/${userId}`, {
           withCredentials: true,
         });
         const userData = response.data || {};
@@ -49,7 +48,7 @@ const UserProfile = () => {
       }
     };
     fetchProfile();
-  }, [apiUrl, userId]);
+  }, [userId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -62,7 +61,7 @@ const UserProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.put(`${apiUrl}/profile`, profile, {
+      const response = await axios.put('/api/profile', profile, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

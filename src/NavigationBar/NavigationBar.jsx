@@ -2,17 +2,15 @@ import { useState } from "react";
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logoutUser } from "../Slices/AuthSlice";
-import { FaSignInAlt, FaUserPlus, FaEnvelope } from "react-icons/fa";
+import { FaSignInAlt, FaUserPlus } from "react-icons/fa";
+import {
+  HiInbox,
+  HiTable,
+  HiPlus,
+  HiHome,
+} from "react-icons/hi";
 import Footer from "../UtilityComponents/Footer";
 import { Sidebar } from "flowbite-react";
-import {
-  HiArrowSmRight,
-  HiChartPie,
-  HiInbox,
-  HiShoppingBag,
-  HiTable,
-  HiUser,
-} from "react-icons/hi";
 
 export default function NavigationBar() {
   const dispatch = useDispatch();
@@ -58,29 +56,17 @@ export default function NavigationBar() {
             <Sidebar aria-label="Sidebar with multi-level dropdown example">
               <Sidebar.Items>
                 <Sidebar.ItemGroup>
-                  <Sidebar.Item href="/" icon={HiChartPie}>
+                  <Sidebar.Item href="/dashboard" icon={HiHome}>
                     Dashboard
                   </Sidebar.Item>
-                  <Sidebar.Collapse icon={HiShoppingBag} label="E-commerce">
-                    <Sidebar.Item href="#">Products</Sidebar.Item>
-                    <Sidebar.Item href="#">Sales</Sidebar.Item>
-                    <Sidebar.Item href="#">Refunds</Sidebar.Item>
-                    <Sidebar.Item href="#">Shipping</Sidebar.Item>
-                  </Sidebar.Collapse>
                   <Sidebar.Item href="/dashboard/messages" icon={HiInbox}>
                     Inbox
                   </Sidebar.Item>
-                  <Sidebar.Item href="/profile" icon={HiUser}>
-                    Profile
+                  <Sidebar.Item href="/post-ad" icon={HiPlus}>
+                    Sell Car
                   </Sidebar.Item>
-                  <Sidebar.Item href="/products" icon={HiShoppingBag}>
-                    Products
-                  </Sidebar.Item>
-                  <Sidebar.Item href="/login" icon={HiArrowSmRight}>
-                    Sign In
-                  </Sidebar.Item>
-                  <Sidebar.Item href="/register" icon={HiTable}>
-                    Sign Up
+                  <Sidebar.Item icon={HiTable}>
+                    <button onClick={handleLogout}>Logout</button>
                   </Sidebar.Item>
                 </Sidebar.ItemGroup>
               </Sidebar.Items>
@@ -97,49 +83,26 @@ export default function NavigationBar() {
           <div className="navbar-center hidden lg:flex">
             <ul className="menu menu-horizontal px-1">
               <li>
-                <Link to="/post-ad" className="text-white hover:text-gray-300">
-                  Sell Car
+                <Link
+                  to="/post-ad"
+                  className="text-white hover:text-gray-300 flex items-center space-x-2"
+                >
+                  <HiPlus className="text-lg" />
+                  <span>Sell Car</span>
                 </Link>
               </li>
               <li>
                 <Link
                   to="/dashboard"
-                  className="text-white hover:text-gray-300"
+                  className="text-white hover:text-gray-300 flex items-center space-x-2"
                 >
-                  Dashboard
+                  <HiHome className="text-lg" />
+                  <span>Dashboard</span>
                 </Link>
               </li>
             </ul>
           </div>
           <div className="flex-none">
-            {isAuthenticated && (
-              <div className="dropdown dropdown-end">
-                <div
-                  tabIndex={0}
-                  role="button"
-                  className="btn btn-ghost btn-circle text-white"
-                >
-                  <div className="indicator">
-                    <FaEnvelope className="h-5 w-5" />
-                    <span className="badge badge-sm indicator-item">8</span>
-                  </div>
-                </div>
-                <div
-                  tabIndex={0}
-                  className="card card-compact dropdown-content bg-gray-800 text-white z-[1] mt-3 w-52 shadow"
-                >
-                  <div className="card-body">
-                    <span className="text-lg font-bold">8 Messages</span>
-                    <span className="text-info">You have new messages</span>
-                    <div className="card-actions">
-                      <button className="btn btn-primary btn-block">
-                        <Link to="/dashboard/messages">View Messages</Link>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
                 <div className="dropdown dropdown-end">
@@ -165,17 +128,10 @@ export default function NavigationBar() {
                       </Link>
                     </li>
                     <li>
-                      <Link to="/settings" className="">
-                        Settings
-                      </Link>
+                      <Link to="/dashboard/messages">Messages</Link>
                     </li>
                     <li>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full text-left "
-                      >
-                        Logout
-                      </button>
+                      <Link onClick={handleLogout}>Logout</Link>
                     </li>
                   </ul>
                 </div>

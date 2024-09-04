@@ -9,12 +9,11 @@ const SearchBar = ({ onSearch }) => {
   const [maxPrice, setMaxPrice] = useState("");
   const [city, setCity] = useState("");
 
-  const apiUrl = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     // Fetch models when component mounts
     axios
-      .get(`${apiUrl}/models`)
+      .get('/api/models')
       .then((response) => setModels(response.data))
       .catch((error) => console.error("Error fetching models:", error));
   }, []);

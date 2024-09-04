@@ -1,13 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const apiUrl = import.meta.env.VITE_API_URL;
-
 export const fetchAllAdverts = createAsyncThunk(
   "adverts/fetchAll",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${apiUrl}/used-cars`);
+      const response = await axios.get("/api/used-cars");
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -22,7 +20,9 @@ export const fetchCarDetails = createAsyncThunk(
   "advertDetail/fetchDetails",
   async (carId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${apiUrl}/used-cars/${carId}`);
+      const response = await axios.get(
+        `/api/used-cars/${carId}`
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -37,7 +37,7 @@ export const fetchUserAdverts = createAsyncThunk(
   "userAdverts/fetchUserAdverts",
   async (userId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${apiUrl}/user-adverts/${userId}`);
+      const response = await axios.get(`/api/user-adverts/${userId}`);
       return response.data;
     } catch (error) {
       return rejectWithValue(

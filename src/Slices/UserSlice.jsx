@@ -11,12 +11,8 @@ const initialState = {
   userHistory: [],
 };
 
-const apiUrl = import.meta.env.VITE_API_URL;
-console.log(apiUrl);
-
 // Create an axios instance with default config
 const api = axios.create({
-  baseURL: apiUrl,
   headers: {
     "Content-Type": "application/json",
   },
@@ -27,7 +23,7 @@ export const registerUser = createAsyncThunk(
   "user/register",
   async ({ username, email, password }, { rejectWithValue }) => {
     try {
-      const response = await api.post("/register", {
+      const response = await api.post("/api/register", {
         username,
         email,
         password,
@@ -45,7 +41,7 @@ export const loginUser = createAsyncThunk(
   "user/login",
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      const response = await api.post("/login", { email, password });
+      const response = await api.post("/api/login", { email, password });
       console.log(response.data);
       // The token should be set as an HttpOnly cookie by the server
       // We don't need to manually handle it here

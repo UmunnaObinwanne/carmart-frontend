@@ -22,7 +22,7 @@ const SearchAndCars = () => {
       setLoading(true);
       try {
         const params = queryString.parse(location.search); // Parse the URL params
-        const response = await axios.get(`${apiUrl}/filter`, {
+        const response = await axios.get("/api/filter", {
           params,
         });
         setCars(response.data);

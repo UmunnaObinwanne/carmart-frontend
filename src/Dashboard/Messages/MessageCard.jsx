@@ -5,12 +5,12 @@ import axios from "axios";
 
 function MessageDetail({ onSelectConversation }) {
   const [conversations, setConversations] = useState([]);
-  const apiUrl = import.meta.env.VITE_API_URL;
+
 
   useEffect(() => {
     const fetchConversations = async () => {
       try {
-        const response = await axios.get(`${apiUrl}/user/messages`, {
+        const response = await axios.get(`/api/user/messages`, {
           withCredentials: true,
         });
         setConversations(response.data);

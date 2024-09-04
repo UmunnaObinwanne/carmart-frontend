@@ -18,7 +18,6 @@ function MessagesList() {
   const [showModal, setShowModal] = useState(false); // State to manage the modal display
   const[markMessageAsRead, setMarkMessageAsRead] = useState(false)
 
-  const apiUrl = import.meta.env.VITE_API_URL; // Update with your API URL
 
   useEffect(() => {
     const fetchConversations = async () => {
@@ -26,7 +25,7 @@ function MessagesList() {
         setLoading(true);
 
         // Fetch conversations
-        const response = await axios.get(`${apiUrl}/chats`, {
+        const response = await axios.get("/api/chats", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -50,7 +49,7 @@ function MessagesList() {
     };
 
     fetchConversations();
-  }, [token, apiUrl]);
+  }, [token]);
 
    const handleSignOut = async () => {
      await dispatch(logoutUser());

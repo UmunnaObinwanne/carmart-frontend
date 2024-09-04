@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "proxy": " http://localhost:5000",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -55,6 +56,5 @@
   "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
   "main": "postcss.config.js",
   "author": "",
-  "license": "ISC",
-  "proxy": "https://carmart-server.onrender.com"
+  "license": "ISC"
 }

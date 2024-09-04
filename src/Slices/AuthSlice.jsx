@@ -1,11 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const apiUrl = import.meta.env.VITE_API_URL;
-
 // Create an axios instance with default config
 const api = axios.create({
-  baseURL: apiUrl,
   withCredentials: true,
 });
 
@@ -13,7 +10,7 @@ export const checkAuthStatus = createAsyncThunk(
   "auth/checkStatus",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get("/auth-check");
+      const response = await api.get("/api/auth-check");
       console.log('auth check', response)
 
       if (response.data.authenticated && response.data.userId) {
@@ -39,7 +36,7 @@ export const logoutUser = createAsyncThunk(
   "user/logout",
   async (_, { rejectWithValue }) => {
     try {
-      await api.post("/logout");
+      await api.post("/api/logout");
       return { success: true };
     } catch (error) {
       return rejectWithValue(error.response?.data?.error || "Logout failed");

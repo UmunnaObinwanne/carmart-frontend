@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import CurrencyInput from "react-currency-input-field";
-import Location from "./LocationUtility/Location";
-import Description from "./Description";
+import Location from "../../PostAdPage/LocationUtility/Location";
+import Description from "../../PostAdPage/Description";
 import { useSelector } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-
-
-const PostAd = () => {
-    const token = useSelector((state) => state.user?.token);
+function EditAd() {
+    const { id } = useParams(); // Get the ad ID from route params
+  const token = useSelector((state) => state.user?.token);
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     title: "",
     category: "",
@@ -49,6 +49,7 @@ const PostAd = () => {
     euroEmissions: "",
   });
 
+  const [existingImageUrls, setExistingImageUrls] = useState([]);
   const [imageFiles, setImageFiles] = useState([]);
   const [categories, setCategories] = useState([]);
   const [models, setModels] = useState([]);
@@ -71,13 +72,13 @@ const PostAd = () => {
           categoryOptions,
           modelOptions,
         ] = await Promise.all([
-          axios.get('/api/transmission-options'),
-          axios.get('/api/drive-options'),
-          axios.get('/api/feature-options'),
-          axios.get('/api/transaction-options'),
-          axios.get('/api/fuel-type'),
-          axios.get('/api/categories'),
-          axios.get('/api/models'),
+          axios.get("/api/transmission-options"),
+          axios.get("/api/drive-options"),
+          axios.get("/api/feature-options"),
+          axios.get("/api/transaction-options"),
+          axios.get("/api/fuel-type"),
+          axios.get("/api/categories"),
+          axios.get("/api/models"),
         ]);
 
         setTransmissions(transmissionOptions.data);
@@ -86,7 +87,8 @@ const PostAd = () => {
         setTransactions(transactionOptions.data);
         setFuelTypes(fuelTypeOptions.data);
         setCategories(categoryOptions.data);
-        setModels(modelOptions.data);
+          setModels(modelOptions.data);
+          console.log('from trans', transmissions, driveTypes)
       } catch (error) {
         console.error("Error fetching options:", error);
       }
@@ -95,23 +97,49 @@ const PostAd = () => {
     fetchOptions();
   }, []);
 
- const handleChange = (e) => {
-   if (e && e.target) {
-     const { name, value, type, checked } = e.target;
-     setFormData((prev) => ({
-       ...prev,
-       [name]: type === "checkbox" ? checked : value,
-     }));
-   }
- };
+  useEffect(() => {
+    if (id) {
+      const fetchAdData = async () => {
+        try {
+          const response = await fetch(`/api/adverts/${id}`);
+            const data = await response.json();
+            console.log('this is form data', data)
+            setFormData({
+              ...data,
+              category: data.category._id,
+              model: data.model._id,
+              transmission: data.transmission || "",
+              driveType: data.driveType || "",
+              fuelType: data.fuelType || "",
+              transaction: data.transaction || "",
+            });
+            console.log('from edit', data)
+          setExistingImageUrls(data.imageUrls || []);
+        } catch (error) {
+          console.error("Error fetching ad data:", error);
+        }
+      };
 
- const handleDescriptionChange = (content) => {
-   setFormData((prev) => ({
-     ...prev,
-     description: content,
-   }));
- };
+      fetchAdData();
+    }
+  }, [id]);
 
+  const handleChange = (e) => {
+    if (e && e.target) {
+      const { name, value, type, checked } = e.target;
+      setFormData((prev) => ({
+        ...prev,
+        [name]: type === "checkbox" ? checked : value,
+      }));
+    }
+  };
+
+  const handleDescriptionChange = (content) => {
+    setFormData((prev) => ({
+      ...prev,
+      description: content,
+    }));
+  };
 
   const handlePriceChange = (value) => {
     setFormData((prevData) => ({
@@ -120,15 +148,16 @@ const PostAd = () => {
     }));
   };
 
-
-
-  const handleLocationChange = (location) => {
-    setFormData((prev) => ({
+    const handleLocationChange = (location) => {
+      setFormData((prev) => ({
+        
       ...prev,
       country: location.country || "",
       city: location.city || "",
       postalCode: location.postalCode || "", // Ensure postalCode is set
-    }));
+      }
+      ));
+      
   };
 
   function formatBytes(bytes, decimals = 2) {
@@ -151,16 +180,12 @@ const PostAd = () => {
     setImageFiles(files);
   }
 
-
   const handleFeatureChange = (e) => {
     const { value, checked } = e.target;
     setFormData((prev) => {
       const updatedFeatures = checked
         ? [...prev.features, value]
         : prev.features.filter((feature) => feature !== value);
-
-      // Logging for debugging purposes
-      console.log("Updated Features:", updatedFeatures);
 
       return {
         ...prev,
@@ -172,41 +197,42 @@ const PostAd = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    let imageUrls = [];
+    let newImageUrls = [];
 
-    const imageFormData = new FormData();
-    imageFiles.forEach((images) => {
-      imageFormData.append(`images`, images);
-    });
+    // Upload new images
+    if (imageFiles.length > 0) {
+      const imageFormData = new FormData();
+      imageFiles.forEach((image) => {
+        imageFormData.append("images", image);
+      });
 
-    try {
-      const imageUploadResponse = await axios.post(
-        "/api/upload-image",
-        imageFormData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          
-          },
-          withCredentials: true, // Include cookies for authentication
-        }
-      );
-      imageUrls = imageUploadResponse.data.imageUrls || []; // Default to empty array if imageUrls is undefined
-      console.log("Image uploaded successfully:", imageUploadResponse.data);
-    } catch (error) {
-      console.error("Image upload failed:", error);
-      // Proceed with empty imageUrls in case of failure
-      // You might want to set imageUrls to empty if upload fails
+      try {
+        const imageUploadResponse = await axios.post(
+          "/api/upload-image",
+          imageFormData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+            withCredentials: true,
+          }
+        );
+        newImageUrls = imageUploadResponse.data.imageUrls || [];
+      } catch (error) {
+        console.error("Image upload failed:", error);
+      }
     }
 
-    // Include the imageUrls in the formData
-    const adData = { ...formData, imageUrls };
-    console.log("Ad data to be posted:", adData);
+    // Combine existing images with newly uploaded images
+    const allImageUrls = [...existingImageUrls, ...newImageUrls];
+
+    // Prepare ad data
+    const adData = { ...formData, imageUrls: allImageUrls };
 
     try {
-      const response = await fetch("/api/create-advert", {
+      const response = await fetch(`/api/edit-advert/${id}`, {
         credentials: "include",
-        method: "POST",
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -215,20 +241,32 @@ const PostAd = () => {
       });
 
       if (response.ok) {
-        toast.success("Advert created successfully!")
-           setTimeout(() => {
-             navigate("/login");
-           }, 2000);
+        toast.success("Advert updated successfully!");
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 2000);
       } else {
         const errorData = await response.json();
-        console.error("Error creating post:", errorData);
-        toast.error("Error Creating Ad");
-        
+        console.error("Error updating post:", errorData);
+        toast.error("Error updating Ad");
       }
     } catch (error) {
-      console.error("Error creating post:", error);
+      console.error("Error updating post:", error);
       setShowModal(true); // Show modal on error
     }
+  };
+
+  const renderExistingImages = () => {
+    return existingImageUrls.map((url, index) => (
+      <div key={index}>
+        <img
+          src={url}
+          alt={`Existing Image ${index}`}
+          style={{ width: "100px", height: "auto" }}
+        />
+        {/* Optionally add a button to remove this image */}
+      </div>
+    ));
   };
 
   return (
@@ -368,6 +406,8 @@ const PostAd = () => {
                 Only PNGs & JPGs, are allowed.
               </p>
             </div>
+            {/* Existing images display */}
+            <div>{renderExistingImages()}</div>
             <div>
               <label
                 htmlFor="carName"
@@ -398,7 +438,12 @@ const PostAd = () => {
           <div className=" mt-4">
             {/* Location */}
             <div className="col-span-2 lg:col-span-1 m-3">
-              <Location onChange={handleLocationChange} />
+              <Location
+                initialPostalCode={formData.postalCode}
+                initialCity={formData.city}
+                initialCountry={formData.country}
+                onChange={handleLocationChange}
+              />
             </div>
           </div>
         </div>
@@ -887,9 +932,8 @@ const PostAd = () => {
           </button>
         </div>
       </form>
-
     </div>
   );
-};
+}
 
-export default PostAd;
+export default EditAd;
