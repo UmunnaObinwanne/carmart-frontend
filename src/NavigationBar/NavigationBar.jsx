@@ -72,10 +72,10 @@ export default function NavigationBar() {
 
                   {/* Collapsible Section with Icons */}
                   <Sidebar.Collapse label="Pages" icon={HiDocumentText}>
-                    <Sidebar.Item href="/about" icon={FaInfoCircle}>
+                    <Sidebar.Item href="/about-carmart" icon={FaInfoCircle}>
                       About Us
                     </Sidebar.Item>
-                    <Sidebar.Item href="/contact" icon={FaPhone}>
+                    <Sidebar.Item href="/contact-us" icon={FaPhone}>
                       Contact
                     </Sidebar.Item>
                     <Sidebar.Item href="/what-we-do" icon={FaClipboardList}>
@@ -110,7 +110,7 @@ export default function NavigationBar() {
             <ul className="menu menu-horizontal px-1 space-x-6">
               <li>
                 <Link
-                  to="/about"
+                  to="/about-carmart"
                   className="text-white hover:text-gray-300 transition-all duration-300 flex items-center space-x-2"
                 >
                   <FaInfoCircle />
@@ -119,7 +119,7 @@ export default function NavigationBar() {
               </li>
               <li>
                 <Link
-                  to="/contact"
+                  to="/contact-us"
                   className="text-white hover:text-gray-300 transition-all duration-300 flex items-center space-x-2"
                 >
                   <FaPhone />

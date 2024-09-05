@@ -17,8 +17,18 @@ import PageDetails from "./ContentManagement/PageDetails";
 import HomepageContainer from "./Homepage-Components/HomepageContainer";
 import LoginRedirect from "./UtilityComponents/LoginRedirect";
 import EditAd from "./Dashboard/AdsTab/EditAd";
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 function App() {
+
+  const location = useLocation()
+  
+  // Scroll to the top of the page on location change
+    useEffect(() => {
+      // Scroll to the top of the page on location change
+      window.scrollTo(0, 0);
+    }, [location]);
   return (
     <div className="bg-white min-h-screen dark:bg-white">
       <Routes>

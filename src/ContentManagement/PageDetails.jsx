@@ -9,6 +9,8 @@ const PageDetails = () => {
   const [error, setError] = useState(null);
 
 
+  
+
   useEffect(() => {
     const fetchPage = async () => {
       try {
