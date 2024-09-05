@@ -6,13 +6,11 @@ const PageList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  //const apiUrl = import.meta.env.VITE_API_URL;
-  const dashboardUrl = import.meta.env.VITE_DASHBOARD_URL;
 
   useEffect(() => {
     const fetchPages = async () => {
       try {
-        const response = await fetch(`${dashboardUrl}/pages`);
+        const response = await fetch(`/api/pages`);
         if (!response.ok) {
           throw new Error("Failed to fetch pages");
         }

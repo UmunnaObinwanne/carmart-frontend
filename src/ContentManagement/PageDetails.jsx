@@ -8,12 +8,11 @@ const PageDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const dashboardUrl = import.meta.env.VITE_DASHBOARD_URL;
 
   useEffect(() => {
     const fetchPage = async () => {
       try {
-        const response = await fetch(`${dashboardUrl}/pages/${slug}`);
+        const response = await fetch(`/api/pages/${slug}`);
         if (!response.ok) {
           throw new Error("Page not found");
         }

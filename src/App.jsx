@@ -36,11 +36,9 @@ function App() {
             <Route path="/used-cars/:id" element={<CarDetailsFetch />} />
             <Route path="/post-ad" element={<PostAd />} />
             <Route path="/edit-ad/:id" element={<EditAd />} />
-
             <Route path="/chats/:chatId" element={<ChatDetails />} />
             <Route path="/dashboard" element={<Dashboard />}>
               <Route path="/dashboard/my-ads" element={<AdsBackend />} />
-
               <Route path="/dashboard/messages" element={<MessagesList />} />
               <Route path="/dashboard/profile" element={<UserProfile />} />
             </Route>

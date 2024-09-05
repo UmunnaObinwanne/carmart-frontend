@@ -2,12 +2,20 @@ import { useState } from "react";
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logoutUser } from "../Slices/AuthSlice";
-import { FaSignInAlt, FaUserPlus } from "react-icons/fa";
+import {
+  FaSignInAlt,
+  FaUserPlus,
+  FaInfoCircle,
+  FaPhone,
+  FaClipboardList,
+} from "react-icons/fa";
 import {
   HiInbox,
   HiTable,
   HiPlus,
   HiHome,
+  HiDocumentText,
+  HiShieldCheck,
 } from "react-icons/hi";
 import Footer from "../UtilityComponents/Footer";
 import { Sidebar } from "flowbite-react";
@@ -16,7 +24,6 @@ export default function NavigationBar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isAuthenticated } = useSelector((state) => state.auth);
-  console.log("from Nav", isAuthenticated);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -62,6 +69,23 @@ export default function NavigationBar() {
                   <Sidebar.Item href="/dashboard/messages" icon={HiInbox}>
                     Inbox
                   </Sidebar.Item>
+
+                  {/* Collapsible Section with Icons */}
+                  <Sidebar.Collapse label="Pages" icon={HiDocumentText}>
+                    <Sidebar.Item href="/about" icon={FaInfoCircle}>
+                      About Us
+                    </Sidebar.Item>
+                    <Sidebar.Item href="/contact" icon={FaPhone}>
+                      Contact
+                    </Sidebar.Item>
+                    <Sidebar.Item href="/what-we-do" icon={FaClipboardList}>
+                      What We Do
+                    </Sidebar.Item>
+                    <Sidebar.Item href="/privacy-policy" icon={HiShieldCheck}>
+                      Privacy Policy
+                    </Sidebar.Item>
+                  </Sidebar.Collapse>
+
                   <Sidebar.Item href="/post-ad" icon={HiPlus}>
                     Sell Car
                   </Sidebar.Item>
@@ -77,11 +101,55 @@ export default function NavigationBar() {
         <div className="navbar bg-gray-800 text-white">
           <div className="flex-1">
             <Link to="/" className="btn btn-ghost text-xl text-white">
-              Carmart Uk
+              Carmart UK
             </Link>
           </div>
-          <div className="navbar-center hidden lg:flex">
-            <ul className="menu menu-horizontal px-1">
+
+          {/* Centered Links */}
+          <div className="navbar-center hidden lg:flex ml-10">
+            <ul className="menu menu-horizontal px-1 space-x-6">
+              <li>
+                <Link
+                  to="/about"
+                  className="text-white hover:text-gray-300 transition-all duration-300 flex items-center space-x-2"
+                >
+                  <FaInfoCircle />
+                  <span>About Us</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/contact"
+                  className="text-white hover:text-gray-300 transition-all duration-300 flex items-center space-x-2"
+                >
+                  <FaPhone />
+                  <span>Contact Us</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/what-we-do"
+                  className="text-white hover:text-gray-300 transition-all duration-300 flex items-center space-x-2"
+                >
+                  <FaClipboardList />
+                  <span>What We Do</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/privacy-policy"
+                  className="text-white hover:text-gray-300 transition-all duration-300 flex items-center space-x-2"
+                >
+                  <HiShieldCheck />
+                  <span>Privacy Policy</span>
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Sell Car and Dashboard */}
+          <div className="navbar-end hidden lg:flex">
+            <ul className="menu menu-horizontal px-1 space-x-6">
               <li>
                 <Link
                   to="/post-ad"
@@ -102,6 +170,8 @@ export default function NavigationBar() {
               </li>
             </ul>
           </div>
+
+          {/* Auth buttons */}
           <div className="flex-none">
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
